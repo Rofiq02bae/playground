@@ -1,3 +1,5 @@
+import './admin-editor.js';
+
 // Toggle menu navigasi mobile (blog.partials.navbar)
 document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.querySelector('[data-nav-toggle]');
