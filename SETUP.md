@@ -92,11 +92,17 @@ Fitur admin:
 
 - CRUD artikel lengkap (judul, slug otomatis/manual, kategori, status
   draft/published, ringkasan, foto sampul dengan upload)
-- **Block editor**: isi artikel disusun dari block yang bisa ditambah,
-  dihapus, dan digeser urutannya (drag & drop lewat handle, atau tombol
-  naik/turun). Tipe block: **Judul** (H2/H3), **Paragraf**, **Foto**
-  (upload file atau URL + keterangan), **List** (bullet/penomoran, satu
-  item per baris), **Kutipan** (teks + sumber).
+- **Block editor ala Gutenberg**: isi artikel ditulis langsung di canvas
+  yang tampilannya mirip artikel asli. Block bisa ditambah (tombol + di
+  tiap block atau tombol di atas), dihapus, diduplikat, dan digeser
+  urutannya (drag & drop lewat handle, atau tombol naik/turun).
+  Tipe block: **Judul** (H2/H3), **Paragraf**, **Foto** (upload file atau
+  URL + keterangan + lebar normal/penuh), **List** (bullet/penomoran,
+  satu item per baris), **Kutipan** (teks + sumber), **Kode**,
+  **Video** (link YouTube/Vimeo, otomatis jadi embed), **Garis Pemisah**.
+  Paragraf, judul, dan kutipan mendukung rich text: sorot teks untuk
+  **bold**, *italic*, underline, dan link — HTML-nya disanitasi di server
+  (hanya format inline aman yang disimpan).
 - Block disimpan sebagai JSON di kolom `articles.blocks`. Teks polosnya
   dibangkitkan otomatis ke kolom `content` untuk pencarian & meta.
 - Styling block di viewer dikunci oleh CSS (`.article-content`), jadi

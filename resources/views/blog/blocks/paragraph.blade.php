@@ -1,1 +1,1 @@
-<p>{!! nl2br(e($block['text'])) !!}</p>
+<p>{!! \App\Support\RichText::sanitize($block['text']) !!}</p>

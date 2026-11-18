@@ -36,7 +36,7 @@
                 <div class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
                     <div class="flex flex-wrap items-center gap-2">
                         <h2 class="text-sm font-semibold text-stone-900">Isi Artikel</h2>
-                        <span class="text-xs text-stone-400">Geser block lewat handle di kiri untuk menyusun urutan</span>
+                        <span class="text-xs text-stone-400">Tulis langsung di canvas — sorot teks untuk bold/italic/link, seret handle untuk menyusun urutan, tombol + untuk menyisipkan block</span>
                     </div>
 
                     <div class="mt-4 flex flex-wrap gap-2" role="group" aria-label="Tambah block">
@@ -45,6 +45,9 @@
                         <button type="button" data-add-block="image" class="rounded-lg bg-stone-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-stone-900">+ Foto</button>
                         <button type="button" data-add-block="list" class="rounded-lg bg-stone-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-stone-900">+ List</button>
                         <button type="button" data-add-block="quote" class="rounded-lg bg-stone-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-stone-900">+ Kutipan</button>
+                        <button type="button" data-add-block="code" class="rounded-lg bg-stone-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-stone-900">+ Kode</button>
+                        <button type="button" data-add-block="video" class="rounded-lg bg-stone-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-stone-900">+ Video</button>
+                        <button type="button" data-add-block="separator" class="rounded-lg bg-stone-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-stone-900">+ Garis Pemisah</button>
                     </div>
 
                     <div id="block-list" class="mt-4 flex flex-col gap-3"></div>

@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\ArticleCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Support\RichText;
 use Illuminate\Support\Str;
 
 class ArticleController extends Controller
@@ -101,8 +102,9 @@ class ArticleController extends Controller
         // meta description, dan estimasi waktu baca di viewer.
         $plainText = collect($blocks)->map(function (array $block) {
             return match ($block['type']) {
-                'heading', 'paragraph', 'quote' => $block['text'],
+                'heading', 'paragraph', 'quote' => RichText::plain($block['text']),
                 'list' => implode("\n", $block['items']),
+                'code' => $block['text'],
                 default => '',
             };
         })->filter()->implode("\n\n");
@@ -147,8 +149,8 @@ class ArticleController extends Controller
 
             switch ($type) {
                 case 'heading':
-                    $text = trim((string) ($block['text'] ?? ''));
-                    if ($text === '') {
+                    $text = RichText::sanitize((string) ($block['text'] ?? ''));
+                    if (RichText::plain($text) === '') {
                         break;
                     }
                     $clean[] = [
@@ -159,8 +161,8 @@ class ArticleController extends Controller
                     break;
 
                 case 'paragraph':
-                    $text = trim((string) ($block['text'] ?? ''));
-                    if ($text === '') {
+                    $text = RichText::sanitize((string) ($block['text'] ?? ''));
+                    if (RichText::plain($text) === '') {
                         break;
                     }
                     $clean[] = ['type' => 'paragraph', 'text' => $text];
@@ -178,6 +180,7 @@ class ArticleController extends Controller
                         'type' => 'image',
                         'src' => $src,
                         'caption' => trim((string) ($block['caption'] ?? '')),
+                        'size' => ($block['size'] ?? 'normal') === 'full' ? 'full' : 'normal',
                     ];
                     break;
 
@@ -198,8 +201,8 @@ class ArticleController extends Controller
                     break;
 
                 case 'quote':
-                    $text = trim((string) ($block['text'] ?? ''));
-                    if ($text === '') {
+                    $text = RichText::sanitize((string) ($block['text'] ?? ''));
+                    if (RichText::plain($text) === '') {
                         break;
                     }
                     $clean[] = [
@@ -208,10 +211,54 @@ class ArticleController extends Controller
                         'source' => trim((string) ($block['source'] ?? '')),
                     ];
                     break;
+
+                case 'code':
+                    $text = trim((string) ($block['text'] ?? ''));
+                    if ($text === '') {
+                        break;
+                    }
+                    $clean[] = [
+                        'type' => 'code',
+                        'text' => $text,
+                        'language' => Str::slug((string) ($block['language'] ?? '')),
+                    ];
+                    break;
+
+                case 'video':
+                    $embed = $this->videoEmbedUrl((string) ($block['url'] ?? ''));
+                    if ($embed === null) {
+                        break;
+                    }
+                    $clean[] = [
+                        'type' => 'video',
+                        'embed' => $embed,
+                        'caption' => trim((string) ($block['caption'] ?? '')),
+                    ];
+                    break;
+
+                case 'separator':
+                    $clean[] = ['type' => 'separator'];
+                    break;
             }
         }
 
         return $clean;
+    }
+
+    /** Ubah URL YouTube/Vimeo menjadi URL embed; null bila tidak dikenal. */
+    private function videoEmbedUrl(string $url): ?string
+    {
+        $url = trim($url);
+
+        if (preg_match('~(?:youtube\.com/(?:watch\?v=|shorts/|embed/)|youtu\.be/)([\w-]{6,})~', $url, $m)) {
+            return 'https://www.youtube.com/embed/'.$m[1];
+        }
+
+        if (preg_match('~vimeo\.com/(\d+)~', $url, $m)) {
+            return 'https://player.vimeo.com/video/'.$m[1];
+        }
+
+        return null;
     }
 
     private function deleteStoredFile(?string $path): void
