@@ -16,6 +16,7 @@ class Article extends Model
         'slug',
         'excerpt',
         'content',
+        'blocks',
         'thumbnail',
         'status',
         'published_at',
@@ -25,6 +26,7 @@ class Article extends Model
     {
         return [
             'published_at' => 'datetime',
+            'blocks' => 'array',
         ];
     }
 

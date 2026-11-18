@@ -2,7 +2,8 @@
 
 Aplikasi Laravel 13 + Blade + Tailwind CSS (Vite) dengan database SQLite.
 Spec lengkap project ada di `README.md` (dokumen FunFarm Platform).
-Fase 1 ini baru membangun **sisi viewer blog**; sisi updater/admin menyusul.
+Fase 1 mencakup **sisi viewer blog** dan **sisi updater/admin** dengan
+block editor drag & drop untuk menyusun isi artikel.
 
 ## Rute viewer
 
@@ -36,6 +37,7 @@ cp .env.example .env
 php artisan key:generate
 touch database/database.sqlite   # bila file belum ada
 php artisan migrate:fresh --seed
+php artisan storage:link         # agar foto upload bisa diakses publik
 php artisan serve
 ```
 
@@ -75,3 +77,36 @@ accessor yang dipakai view:
 Tabel `articles`: `title`, `slug` (otomatis dari judul, unik), `excerpt`,
 `content`, `thumbnail` (nullable), `status` (`draft`/`published`),
 `published_at`, dan relasi `article_category_id` ke `article_categories`.
+
+## Admin (updater) — block editor
+
+Login di **http://127.0.0.1:8000/admin/login**
+
+Akun awal dari seeder (ganti password-nya setelah login pertama di
+lingkungan nyata):
+
+- Email: `admin@funfarm.id`
+- Password: `admin123`
+
+Fitur admin:
+
+- CRUD artikel lengkap (judul, slug otomatis/manual, kategori, status
+  draft/published, ringkasan, foto sampul dengan upload)
+- **Block editor**: isi artikel disusun dari block yang bisa ditambah,
+  dihapus, dan digeser urutannya (drag & drop lewat handle, atau tombol
+  naik/turun). Tipe block: **Judul** (H2/H3), **Paragraf**, **Foto**
+  (upload file atau URL + keterangan), **List** (bullet/penomoran, satu
+  item per baris), **Kutipan** (teks + sumber).
+- Block disimpan sebagai JSON di kolom `articles.blocks`. Teks polosnya
+  dibangkitkan otomatis ke kolom `content` untuk pencarian & meta.
+- Styling block di viewer dikunci oleh CSS (`.article-content`), jadi
+  semua artikel tetap tampil seragam ala halaman artikel PetaniKode.
+- Artikel lama tanpa block (mis. dari seeder) tetap tampil — viewer
+  memakai fallback render dari kolom `content`.
+
+| Bagian admin | Lokasi |
+|---|---|
+| Controller | `app/Http/Controllers/Admin/ArticleController.php`, `AuthController.php` |
+| View admin | `resources/views/admin/` |
+| Block editor JS | `resources/js/admin-editor.js` (SortableJS) |
+| Render block di viewer | `resources/views/blog/blocks/` |

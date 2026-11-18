@@ -75,7 +75,13 @@
 
                     {{-- 3. Konten --}}
                     <div class="article-content mt-8 text-stone-700">
-                        {!! $article->safe_content !!}
+                        @if (!empty($article->blocks))
+                            @foreach ($article->blocks as $block)
+                                @includeIf('blog.blocks.'.$block['type'], ['block' => $block])
+                            @endforeach
+                        @else
+                            {!! $article->safe_content !!}
+                        @endif
                     </div>
 
                     <div class="mt-10 border-t border-stone-200 pt-6">
