@@ -106,15 +106,20 @@ class BlogController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        $relatedArticles = Article::published()
+        // Sidebar kanan (1/3): artikel terbaru selain yang sedang dibaca.
+        $latestArticles = Article::published()
             ->with('category')
-            ->where('article_category_id', $article->article_category_id)
             ->where('id', '!=', $article->id)
             ->orderByDesc('published_at')
-            ->limit(3)
+            ->orderByDesc('id')
+            ->limit(5)
             ->get();
 
-        return view('blog.show', compact('article', 'relatedArticles'));
+        return view('blog.show', [
+            'article' => $article,
+            'latestArticles' => $latestArticles,
+            'categories' => $this->categories(),
+        ]);
     }
 
     private function categories()
