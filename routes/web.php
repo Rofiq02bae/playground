@@ -26,3 +26,4 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::resource('articles', AdminArticleController::class)->except(['show']);
     });
 });
+
