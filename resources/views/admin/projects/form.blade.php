@@ -52,7 +52,7 @@
                 @error('location')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Luas (hektar)</label>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">Luas (M²)</label>
                 <input type="number" name="area_size" value="{{ old('area_size', $project->area_size) }}" step="0.01" min="0.01" required
                        class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
                 @error('area_size')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -111,12 +111,7 @@
         <div class="mt-6 flex gap-3">
             <button type="submit" class="rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800">Simpan</button>
             <a href="{{ route('admin.projects.index') }}" class="rounded-xl border border-stone-300 px-5 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50">Batal</a>
-            @if ($project->exists)
-                <form method="POST" action="{{ route('admin.projects.destroy', $project) }}" class="ml-auto" onsubmit="return confirm('Hapus proyek ini beserta seluruh pencatatannya?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="rounded-xl border border-red-200 px-5 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50">Hapus Proyek</button>
-                </form>
-            @endif
+            
         </div>
     </form>
 

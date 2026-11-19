@@ -19,7 +19,7 @@
 
     <div class="mb-6 grid gap-4 sm:grid-cols-3">
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Total Biaya Disetujui</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Total Biaya Berjalan</p>
             <p class="mt-1 text-2xl font-bold text-emerald-900">Rp{{ number_format($approvedTotal, 0, ',', '.') }}</p>
             <p class="text-xs text-emerald-700">Hanya data approved yang dihitung</p>
         </div>

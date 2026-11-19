@@ -5,7 +5,7 @@
 @section('content')
     <div class="rounded-2xl border border-stone-200 bg-white p-5">
         <h1 class="text-lg font-semibold text-stone-900">Halo, {{ $user->name }}</h1>
-        <p class="mt-1 text-sm text-stone-500">Anda masuk sebagai <strong class="text-stone-700">{{ $user->roleLabel() }}</strong>.</p>
+        <p class="mt-1 text-sm text-stone-500">Halo <strong class="text-stone-700">{{ $user->roleLabel() }}</strong>.</p>
 
         @if ($user->isPemilik())
             <p class="mt-3 inline-block rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">Status: {{ $user->membershipLabel() }}{{ $user->is_member ? ' — harga sewa dapat potongan' : ' — harga sewa normal' }}</p>
