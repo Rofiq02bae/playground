@@ -58,9 +58,16 @@
                 @error('area_size')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Koordinat (opsional)</label>
-                <input type="text" name="coordinates" value="{{ old('coordinates', $project->coordinates) }}" placeholder="-7.123, 110.456"
-                       class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">Koordinat lokasi sawah (opsional)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="field-coordinates" name="coordinates" value="{{ old('coordinates', $project->coordinates) }}" placeholder="Klik Pilih di Peta" readonly data-open-field-map
+                           class="w-full cursor-pointer rounded-xl border border-stone-300 bg-stone-50 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
+                    <button type="button" data-open-field-map class="shrink-0 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800">Pilih di Peta</button>
+                </div>
+                <input type="hidden" id="field-boundary" name="boundary_geojson" value="{{ old('boundary_geojson', $project->boundary_geojson ? json_encode($project->boundary_geojson) : '') }}">
+                <p class="mt-1.5 text-xs text-stone-400">Gambar poligon batas sawah atau taruh pin di peta satelit; koordinat (latitude, longitude) terisi otomatis dari titik tengahnya.</p>
+                @error('coordinates')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                @error('boundary_geojson')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-stone-700">Jenis tanaman</label>
@@ -112,4 +119,25 @@
             @endif
         </div>
     </form>
+
+    {{-- Popup pemilih lokasi sawah: peta baru muncul saat field koordinat / tombol ditekan --}}
+    <div id="field-map-modal" class="fixed inset-0 z-50 hidden bg-stone-950/70 p-3 sm:p-6">
+        <div class="mx-auto flex h-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-center gap-3 border-b border-stone-200 px-4 py-3">
+                <div class="min-w-0">
+                    <h2 class="truncate text-sm font-semibold text-stone-900">Tentukan Lokasi Sawah</h2>
+                    <p id="field-map-status" class="truncate text-xs text-stone-500">Gambar poligon batas sawah atau taruh pin di peta.</p>
+                </div>
+                <button type="button" id="field-map-gps" class="ml-auto shrink-0 rounded-lg border border-stone-300 px-3 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50">Posisi Saya (GPS)</button>
+                <button type="button" data-close-field-map class="shrink-0 rounded-lg px-2 py-2 text-lg leading-none text-stone-400 transition hover:text-stone-700" aria-label="Tutup">&times;</button>
+            </div>
+            <div id="field-map-canvas" class="min-h-0 flex-1"></div>
+            <div class="flex items-center justify-end gap-3 border-t border-stone-200 px-4 py-3">
+                <button type="button" data-close-field-map class="rounded-xl border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50">Batal</button>
+                <button type="button" id="field-map-confirm" class="rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800">Gunakan Lokasi Ini</button>
+            </div>
+        </div>
+    </div>
+
+    @vite(['resources/js/field-map.js'])
 @endsection

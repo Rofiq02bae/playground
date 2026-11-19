@@ -106,7 +106,7 @@ class ProjectController extends Controller
 
     private function validateProject(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'owner_id' => ['required', Rule::exists('users', 'id')->where('role', User::ROLE_PEMILIK)],
             'cultivator_id' => ['nullable', Rule::exists('users', 'id')->where('role', User::ROLE_PENGGARAP)],
@@ -114,6 +114,25 @@ class ProjectController extends Controller
             'location' => ['required', 'string', 'max:255'],
             'area_size' => ['required', 'numeric', 'min:0.01'],
             'coordinates' => ['nullable', 'string', 'max:255'],
+            'boundary_geojson' => ['nullable', 'string', function (string $attribute, mixed $value, \Closure $fail) {
+                $decoded = json_decode($value, true);
+                $geometry = ($decoded['type'] ?? null) === 'Feature' ? ($decoded['geometry'] ?? null) : $decoded;
+
+                if (! is_array($geometry) || ($geometry['type'] ?? null) !== 'Polygon' || empty($geometry['coordinates'][0])) {
+                    $fail('Batas sawah harus berupa GeoJSON poligon yang valid.');
+
+                    return;
+                }
+
+                foreach ($geometry['coordinates'][0] as $point) {
+                    [$lng, $lat] = $point + [0, 0];
+                    if (! is_numeric($lng) || ! is_numeric($lat) || $lng < 94 || $lng > 142 || $lat < -12 || $lat > 7) {
+                        $fail('Koordinat batas sawah berada di luar wilayah Indonesia.');
+
+                        return;
+                    }
+                }
+            }],
             'crop_type' => ['required', 'string', 'max:255'],
             'crop_variety' => ['nullable', 'string', 'max:255'],
             'start_date' => ['required', 'date'],
@@ -121,5 +140,11 @@ class ProjectController extends Controller
             'status' => ['required', Rule::in(AgriculturalProject::STATUSES)],
             'profit_share_company_percent' => ['required', 'integer', 'min:0', 'max:100'],
         ]);
+
+        $data['boundary_geojson'] = ! empty($data['boundary_geojson'])
+            ? json_decode($data['boundary_geojson'], true)
+            : null;
+
+        return $data;
     }
 }

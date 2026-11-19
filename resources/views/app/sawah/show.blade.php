@@ -24,6 +24,9 @@
             <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Total Biaya Disetujui Perusahaan</p>
             <p class="text-xl font-bold text-emerald-900">Rp{{ number_format($approvedTotal, 0, ',', '.') }}</p>
         </div>
+        <div class="mt-4">
+            @include('partials.field-map-display', ['project' => $project])
+        </div>
     </div>
 
     @if ($canAdd)

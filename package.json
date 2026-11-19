@@ -17,6 +17,8 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+        "@geoman-io/leaflet-geoman-free": "^2.20.8",
+        "leaflet": "^1.9.4",
         "sortablejs": "^1.15.7"
     }
 }

@@ -13,6 +13,10 @@
         <a href="{{ route('admin.projects.edit', $project) }}" class="ml-auto rounded-xl border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50">Ubah Profil</a>
     </div>
 
+    <div class="mb-6">
+        @include('partials.field-map-display', ['project' => $project])
+    </div>
+
     <div class="mb-6 grid gap-4 sm:grid-cols-3">
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
             <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Total Biaya Disetujui</p>

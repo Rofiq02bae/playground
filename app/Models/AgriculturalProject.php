@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'name', 'owner_id', 'cultivator_id', 'field_name', 'location', 'area_size',
-    'coordinates', 'crop_type', 'crop_variety', 'start_date',
+    'coordinates', 'boundary_geojson', 'crop_type', 'crop_variety', 'start_date',
     'estimated_harvest_date', 'status', 'profit_share_company_percent', 'created_by',
 ])]
 class AgriculturalProject extends Model
@@ -21,6 +21,7 @@ class AgriculturalProject extends Model
     {
         return [
             'area_size' => 'decimal:2',
+            'boundary_geojson' => 'array',
             'start_date' => 'date',
             'estimated_harvest_date' => 'date',
             'profit_share_company_percent' => 'integer',

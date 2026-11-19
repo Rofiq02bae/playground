@@ -183,6 +183,31 @@ Daerah Istimewa Yogyakarta".
 - Dropdown diisi lewat endpoint JSON `GET /admin/regions/children?parent=<kode>`
   (khusus admin).
 
+## Fase 2 — Lokasi sawah di peta (Leaflet + Geoman)
+
+Di form proyek (`/admin/projects`), field **Koordinat lokasi sawah**
+bersifat readonly: klik field / tombol **Pilih di Peta** untuk membuka
+popup peta (full-screen di HP). Alurnya:
+
+1. Popup berisi peta satelit **Esri World Imagery** (gratis, tanpa API
+   key) + pilihan layer Peta Jalan (OSM), tombol **Posisi Saya (GPS)**.
+2. Gambar **poligon** batas sawah atau taruh **pin** (Leaflet-Geoman),
+   bisa diedit/digeser/dihapus.
+3. Klik **Gunakan Lokasi Ini**: latitude & longitude (titik tengah
+   poligon, atau koordinat pin) otomatis masuk ke field koordinat form.
+   Sesuai keputusan desain: luas sawah TIDAK dihitung otomatis dari
+   poligon — field luas tetap diisi manual.
+4. Poligon tersimpan sebagai GeoJSON di kolom `boundary_geojson`
+   (divalidasi server: harus poligon & koordinat di wilayah Indonesia),
+   lalu tampil sebagai peta read-only di detail proyek admin dan
+   detail sawah webapp.
+
+Catatan teknis: aset peta adalah entry Vite terpisah
+(`resources/js/field-map.js`, Leaflet 1.9 + Geoman) yang hanya dimuat
+di halaman form/detail proyek — jangan lupa `npm install` lalu
+`npm run build` setelah pull. Peta di-init saat popup pertama dibuka
++ `invalidateSize()` agar tile tidak rusak.
+
 ## Fase 2 — Pencatatan (proyek, sewa, pupuk/obat, approval)
 
 | Rute | Siapa | Isi |
