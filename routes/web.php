@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Admin\ProjectController as AdminProjectController;
+use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\App\HomeController as AppHomeController;
@@ -34,6 +35,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::redirect('/', '/admin/articles');
         Route::resource('articles', AdminArticleController::class)->except(['show']);
         Route::resource('users', AdminUserController::class)->except(['show']);
+        Route::get('/regions/children', [RegionController::class, 'children'])->name('regions.children');
 
         // Fase 2 — pencatatan (desktop view perusahaan)
         Route::resource('projects', AdminProjectController::class);

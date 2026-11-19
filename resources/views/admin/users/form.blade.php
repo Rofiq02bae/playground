@@ -68,12 +68,116 @@
                 </div>
             </div>
 
-            <div>
-                <label for="address" class="mb-1.5 block text-sm font-medium text-stone-700">Alamat (sesuai identitas)</label>
-                <textarea id="address" name="address" rows="2"
-                          class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">{{ old('address', $user->address) }}</textarea>
-                @error('address')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
-            </div>
+            <fieldset class="rounded-xl border border-stone-200 p-4">
+                <legend class="px-1 text-sm font-medium text-stone-700">Alamat (sesuai identitas)</legend>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="province_code" class="mb-1.5 block text-sm font-medium text-stone-700">Provinsi</label>
+                        <select id="province_code" name="province_code" data-selected="{{ old('province_code', $user->province_code) }}"
+                                class="region-select w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
+                            <option value="">— pilih provinsi —</option>
+                        </select>
+                        @error('province_code')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="regency_code" class="mb-1.5 block text-sm font-medium text-stone-700">Kabupaten / Kota</label>
+                        <select id="regency_code" name="regency_code" data-selected="{{ old('regency_code', $user->regency_code) }}" disabled
+                                class="region-select w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 disabled:bg-stone-50">
+                            <option value="">— pilih provinsi dulu —</option>
+                        </select>
+                        @error('regency_code')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="district_code" class="mb-1.5 block text-sm font-medium text-stone-700">Kecamatan</label>
+                        <select id="district_code" name="district_code" data-selected="{{ old('district_code', $user->district_code) }}" disabled
+                                class="region-select w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 disabled:bg-stone-50">
+                            <option value="">— pilih kabupaten/kota dulu —</option>
+                        </select>
+                        @error('district_code')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="village_code" class="mb-1.5 block text-sm font-medium text-stone-700">Kelurahan / Desa</label>
+                        <select id="village_code" name="village_code" data-selected="{{ old('village_code', $user->village_code) }}" disabled
+                                class="region-select w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 disabled:bg-stone-50">
+                            <option value="">— pilih kecamatan dulu —</option>
+                        </select>
+                        @error('village_code')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="hamlet" class="mb-1.5 block text-sm font-medium text-stone-700">Dusun</label>
+                        <input id="hamlet" type="text" name="hamlet" value="{{ old('hamlet', $user->hamlet) }}" placeholder="cth: Krajan"
+                               class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
+                        @error('hamlet')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="rt" class="mb-1.5 block text-sm font-medium text-stone-700">RT</label>
+                            <input id="rt" type="text" name="rt" value="{{ old('rt', $user->rt) }}" placeholder="001"
+                                   class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
+                            @error('rt')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="rw" class="mb-1.5 block text-sm font-medium text-stone-700">RW</label>
+                            <input id="rw" type="text" name="rw" value="{{ old('rw', $user->rw) }}" placeholder="002"
+                                   class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
+                            @error('rw')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 text-xs text-stone-400">Alamat lengkap tersimpan otomatis dari pilihan wilayah + dusun/RT/RW, mis: "Dusun Krajan, RT 001/RW 002, Balecatur, Kec. Gamping, Kabupaten Sleman, DI Yogyakarta".</p>
+            </fieldset>
+
+            <script>
+            (function () {
+                const endpoint = @json(route('admin.regions.children'));
+                const chain = ['province_code', 'regency_code', 'district_code', 'village_code'];
+                const placeholders = {
+                    province_code: '— pilih provinsi —',
+                    regency_code: '— pilih kabupaten/kota —',
+                    district_code: '— pilih kecamatan —',
+                    village_code: '— pilih kelurahan/desa —'
+                };
+
+                function resetFrom(index) {
+                    for (let i = index; i < chain.length; i++) {
+                        const el = document.getElementById(chain[i]);
+                        el.innerHTML = '<option value="">' + placeholders[chain[i]] + '</option>';
+                        el.disabled = true;
+                    }
+                }
+
+                async function load(index, parent, selected) {
+                    const el = document.getElementById(chain[index]);
+                    const url = parent ? endpoint + '?parent=' + encodeURIComponent(parent) : endpoint;
+                    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                    const items = await res.json();
+                    el.innerHTML = '<option value="">' + placeholders[chain[index]] + '</option>';
+                    items.forEach(function (item) {
+                        const opt = document.createElement('option');
+                        opt.value = item.kode;
+                        opt.textContent = item.nama;
+                        el.appendChild(opt);
+                    });
+                    el.disabled = false;
+                    if (selected) {
+                        el.value = selected;
+                        if (el.value === selected && index + 1 < chain.length) {
+                            await load(index + 1, selected, document.getElementById(chain[index + 1]).dataset.selected || '');
+                        }
+                    }
+                }
+
+                chain.forEach(function (id, index) {
+                    document.getElementById(id).addEventListener('change', function () {
+                        if (index + 1 >= chain.length) return;
+                        resetFrom(index + 1);
+                        if (this.value) load(index + 1, this.value, '');
+                    });
+                });
+
+                load(0, '', document.getElementById('province_code').dataset.selected || '');
+            })();
+            </script>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>

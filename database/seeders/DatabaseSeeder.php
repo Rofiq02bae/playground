@@ -67,6 +67,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call([
+            RegionSeeder::class,
             ArticleSeeder::class,
             Fase2Seeder::class,
         ]);

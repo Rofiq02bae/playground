@@ -38,7 +38,7 @@
             <tbody>
                 @forelse ($users as $user)
                     <tr class="border-b border-stone-100 last:border-0">
-                        <td class="px-4 py-3 font-medium text-stone-900">{{ $user->name }}</td>
+                        <td class="px-4 py-3"><span class="font-medium text-stone-900">{{ $user->name }}</span>@if ($user->address)<br><span class="text-xs font-normal text-stone-400">{{ $user->address }}</span>@endif</td>
                         <td class="px-4 py-3 text-stone-600">{{ $user->username ?? '-' }}<br><span class="text-xs text-stone-400">{{ $user->email ?? 'tanpa email' }}</span></td>
                         <td class="px-4 py-3"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">{{ $user->roleLabel() }}</span></td>
                         <td class="px-4 py-3">{{ $user->isPemilik() ? $user->membershipLabel() : '-' }}</td>

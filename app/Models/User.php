@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'username', 'phone', 'address', 'is_member'])]
+#[Fillable(['name', 'email', 'password', 'role', 'username', 'phone', 'address', 'is_member', 'province_code', 'regency_code', 'district_code', 'village_code', 'hamlet', 'rt', 'rw'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -68,5 +68,60 @@ class User extends Authenticatable
     public function membershipLabel(): string
     {
         return $this->is_member ? 'Membership' : 'Bukan Membership';
+    }
+
+    public function province(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Region::class, 'province_code', 'kode');
+    }
+
+    public function regency(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Region::class, 'regency_code', 'kode');
+    }
+
+    public function district(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Region::class, 'district_code', 'kode');
+    }
+
+    public function village(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Region::class, 'village_code', 'kode');
+    }
+
+    /**
+     * Susun alamat lengkap dari bagian-bagiannya:
+     * "Dusun Krajan, RT 001/RW 002, Balecatur, Kec. Gamping, Kabupaten Sleman, DI Yogyakarta".
+     */
+    public static function composeAddress(array $parts, array $regionNames): ?string
+    {
+        $segments = [];
+
+        if (! empty($parts['hamlet'])) {
+            $segments[] = 'Dusun '.$parts['hamlet'];
+        }
+
+        if (! empty($parts['rt']) || ! empty($parts['rw'])) {
+            $segments[] = 'RT '.($parts['rt'] ?: '-').'/RW '.($parts['rw'] ?: '-');
+        }
+
+        if (! empty($regionNames['village'])) {
+            $segments[] = $regionNames['village'];
+        }
+
+        if (! empty($regionNames['district'])) {
+            $segments[] = 'Kec. '.$regionNames['district'];
+        }
+
+        if (! empty($regionNames['regency'])) {
+            $segments[] = $regionNames['regency'];
+        }
+
+        if (! empty($regionNames['province'])) {
+            $segments[] = $regionNames['province'];
+        }
+
+        return $segments ? implode(', ', $segments) : null;
     }
 }

@@ -164,6 +164,25 @@ Tahap berikutnya: kalender tanam/panen, laporan biaya produksi
 Showcase sewa ditunda sampai landing page root dibuat; katalog produk
 unggulan di-skip dulu.
 
+## Fase 2 — Alamat pengguna: dropdown wilayah bertingkat
+
+Form tambah/edit pengguna (`/admin/users`) memakai dropdown alamat
+bertingkat: **Provinsi -> Kabupaten/Kota -> Kecamatan -> Kelurahan/Desa**,
+lalu isian teks **Dusun** dan **RT/RW** di bawahnya. Alamat lengkap
+tersimpan terkomposisi otomatis, mis:
+"Dusun Krajan, RT 001/RW 002, Balecatur, Kec. Gamping, Kabupaten Sleman,
+Daerah Istimewa Yogyakarta".
+
+- Data wilayah: tabel `regions` (91.599 baris — 38 provinsi,
+  514 kabupaten/kota, 7.285 kecamatan, 83.762 kelurahan/desa), kode
+  hierarkis bertitik (`34`, `34.04`, `34.04.01`, `34.04.01.2001`).
+- Sumber data: cahyadsn/wilayah (Kepmendagri No 300.2.2-2138 Tahun 2025),
+  dikonversi ke `database/seeders/data/wilayah.csv`, diimpor oleh
+  `RegionSeeder` (otomatis jalan lewat `php artisan migrate:fresh --seed`
+  atau `php artisan db:seed --class=RegionSeeder`).
+- Dropdown diisi lewat endpoint JSON `GET /admin/regions/children?parent=<kode>`
+  (khusus admin).
+
 ## Fase 2 — Pencatatan (proyek, sewa, pupuk/obat, approval)
 
 | Rute | Siapa | Isi |

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Region;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,6 +48,7 @@ class UserController extends Controller
         $data = $this->validateUser($request);
         $data['password'] = Hash::make($data['password']);
         $data['is_member'] = $request->boolean('is_member');
+        $data['address'] = $this->composeAddress($data);
 
         User::create($data);
 
@@ -72,6 +74,7 @@ class UserController extends Controller
         }
 
         $data['is_member'] = $request->boolean('is_member');
+        $data['address'] = $this->composeAddress($data);
         $user->update($data);
 
         return redirect()->route('admin.users.index')->with('success', 'Data pengguna berhasil diperbarui.');
@@ -100,9 +103,34 @@ class UserController extends Controller
             'username' => ['required_without:email', 'nullable', 'string', 'max:50', 'alpha_dash', Rule::unique('users', 'username')->ignore($user?->id)],
             'email' => ['required_without:username', 'nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
             'phone' => ['nullable', 'string', 'max:30'],
-            'address' => ['nullable', 'string', 'max:1000'],
+            'province_code' => ['nullable', 'string', 'max:13', Rule::exists('regions', 'kode')],
+            'regency_code' => ['nullable', 'string', 'max:13', Rule::exists('regions', 'kode')],
+            'district_code' => ['nullable', 'string', 'max:13', Rule::exists('regions', 'kode')],
+            'village_code' => ['nullable', 'string', 'max:13', Rule::exists('regions', 'kode')],
+            'hamlet' => ['nullable', 'string', 'max:255'],
+            'rt' => ['nullable', 'string', 'max:10'],
+            'rw' => ['nullable', 'string', 'max:10'],
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:6', 'confirmed'],
             'is_member' => ['nullable', 'boolean'],
+        ]);
+    }
+
+    /** Alamat lengkap disimpan terkomposisi dari dropdown wilayah + dusun/RT/RW. */
+    private function composeAddress(array $data): ?string
+    {
+        $province = $data['province_code'] ?? null;
+        $regency = $data['regency_code'] ?? null;
+        $district = $data['district_code'] ?? null;
+        $village = $data['village_code'] ?? null;
+
+        $names = Region::whereIn('kode', array_filter([$province, $regency, $district, $village]))
+            ->pluck('nama', 'kode');
+
+        return User::composeAddress($data, [
+            'province' => $province ? ($names[$province] ?? null) : null,
+            'regency' => $regency ? ($names[$regency] ?? null) : null,
+            'district' => $district ? ($names[$district] ?? null) : null,
+            'village' => $village ? ($names[$village] ?? null) : null,
         ]);
     }
 }
