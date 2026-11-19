@@ -1,4 +1,4 @@
-# FunFarm Platform — Fase 1: Blog (Sisi Viewer)
+# FunFarm Platform — Fase 1: Blog + Fase 2: Service (fondasi RBAC & webapp pencatatan)
 
 Aplikasi Laravel 13 + Blade + Tailwind CSS (Vite) dengan database SQLite.
 Spec lengkap project ada di `README.md` (dokumen FunFarm Platform).
@@ -116,3 +116,50 @@ Fitur admin:
 | View admin | `resources/views/admin/` |
 | Block editor JS | `resources/js/admin-editor.js` (SortableJS) |
 | Render block di viewer | `resources/views/blog/blocks/` |
+
+## Fase 2 — Fondasi RBAC & WebApp Pencatatan
+
+Satu database dan satu tabel `users` untuk blog + webapp, dibedakan
+dengan kolom `role` (RBAC, middleware `role:`):
+
+| Role | Akses |
+|---|---|
+| `admin` (perusahaan) | Semua akses: blog admin, webapp, kelola pengguna, approval data |
+| `pemilik` (pemilik sawah) | Webapp — hanya melihat data |
+| `penggarap` (penggarap sawah) | Webapp — melihat + menambah data (menunggu approval perusahaan) |
+
+- Login satu pintu di `/admin/login`, bisa pakai **email atau username**.
+  Setelah login: admin diarahkan ke panel admin, pemilik/penggarap ke
+  webapp `/app` (tampilan mobile).
+- Akun pemilik/penggarap **dibuatkan perusahaan** dari menu
+  **Pengguna** di panel admin (`/admin/users`) — tidak ada pendaftaran
+  mandiri. Saat membuat akun pemilik, admin mengecek identitas customer
+  dulu lalu menetapkan statusnya lewat pilihan **Membership** /
+  **Bukan Membership** (membership = potongan harga sewa; sumbernya dari
+  langganan WiFi atau bayar sendiri, tidak dibedakan di sistem ini dan
+  database WiFi tidak terhubung ke sini).
+- Migrasi Fase 2 menambahkan ke `users`: `role`, `username`, `phone`,
+  `address`, `is_member`, dan membuat `email` boleh kosong.
+
+Akun demo dari seeder (untuk uji role; ganti/hapus di lingkungan nyata):
+
+| Username | Password | Role | Membership |
+|---|---|---|---|
+| `admin` / `admin@funfarm.id` | `admin123` | Admin (perusahaan) | — |
+| `budi` | `pemilik123` | Pemilik | Membership |
+| `sari` | `pemilik123` | Pemilik | Bukan Membership |
+| `joko` | `penggarap123` | Penggarap | — |
+
+Setelah `git pull` versi ini, jalankan ulang:
+
+```bash
+composer install
+npm install
+npm run build
+php artisan migrate --seed
+```
+
+Tahap berikutnya: profil sawah, pencatatan pupuk/obat & sewa dengan
+approval, kalender tanam/panen, laporan biaya produksi, dan generate
+surat perjanjian (pemilik ↔ perusahaan). Showcase sewa ditunda sampai
+landing page root dibuat; katalog produk unggulan di-skip dulu.

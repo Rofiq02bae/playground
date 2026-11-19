@@ -15,6 +15,8 @@
             </a>
             <nav class="flex items-center gap-4 text-sm font-medium">
                 <a href="{{ route('admin.articles.index') }}" class="text-emerald-800">Artikel</a>
+                <a href="{{ route('admin.users.index') }}" class="text-stone-600 hover:text-emerald-800">Pengguna</a>
+                <a href="{{ route('app.home') }}" class="text-stone-600 hover:text-emerald-800">WebApp</a>
                 <a href="{{ route('blog.index') }}" class="text-stone-600 hover:text-emerald-800" target="_blank" rel="noopener">Lihat Blog</a>
             </nav>
             <div class="ml-auto flex items-center gap-4">
