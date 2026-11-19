@@ -33,8 +33,8 @@
     <nav class="fixed inset-x-0 bottom-0 border-t border-stone-200 bg-white">
         <div class="mx-auto grid max-w-3xl grid-cols-4 text-center text-xs font-medium text-stone-600">
             <a href="{{ route('app.home') }}" class="px-2 py-3 text-emerald-800">Beranda</a>
-            <span class="px-2 py-3 text-stone-400">Sawah</span>
-            <span class="px-2 py-3 text-stone-400">Catatan</span>
+            <a href="{{ route('app.sawah.index') }}" class="px-2 py-3 hover:text-emerald-800">Sawah</a>
+            <a href="{{ route('app.sawah.index') }}" class="px-2 py-3 hover:text-emerald-800">Catatan</a>
             <span class="px-2 py-3 text-stone-400">Laporan</span>
         </div>
     </nav>

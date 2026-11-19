@@ -15,6 +15,12 @@
             </a>
             <nav class="flex items-center gap-4 text-sm font-medium">
                 <a href="{{ route('admin.articles.index') }}" class="text-emerald-800">Artikel</a>
+                <a href="{{ route('admin.projects.index') }}" class="text-stone-600 hover:text-emerald-800">Proyek Sawah</a>
+                <a href="{{ route('admin.approvals.index') }}" class="text-stone-600 hover:text-emerald-800">Persetujuan
+                    @php($pendingNav = \App\Models\ProjectExpense::where('status', 'pending')->count())
+                    @if ($pendingNav > 0)<span class="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">{{ $pendingNav }}</span>@endif
+                </a>
+                <a href="{{ route('admin.services.index') }}" class="text-stone-600 hover:text-emerald-800">Layanan &amp; Harga</a>
                 <a href="{{ route('admin.users.index') }}" class="text-stone-600 hover:text-emerald-800">Pengguna</a>
                 <a href="{{ route('app.home') }}" class="text-stone-600 hover:text-emerald-800">WebApp</a>
                 <a href="{{ route('blog.index') }}" class="text-stone-600 hover:text-emerald-800" target="_blank" rel="noopener">Lihat Blog</a>

@@ -19,7 +19,15 @@
     </div>
 
     <div class="mt-4 grid grid-cols-2 gap-3">
-        @foreach (['Profil Sawah', 'Pencatatan Pupuk & Obat', 'Kalender Tanam & Panen', 'Laporan Biaya Produksi', 'Surat Perjanjian'] as $menu)
+        <a href="{{ route('app.sawah.index') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
+            <p class="text-sm font-semibold text-emerald-900">Profil Sawah</p>
+            <p class="mt-1 text-xs text-stone-500">Lihat sawah &amp; proyek Anda</p>
+        </a>
+        <a href="{{ route('app.sawah.index') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
+            <p class="text-sm font-semibold text-emerald-900">Pencatatan Pupuk &amp; Obat</p>
+            <p class="mt-1 text-xs text-stone-500">Buka sawah, lalu tambah catatan</p>
+        </a>
+        @foreach (['Kalender Tanam & Panen', 'Laporan Biaya Produksi', 'Surat Perjanjian'] as $menu)
             <div class="rounded-2xl border border-stone-200 bg-white p-4">
                 <p class="text-sm font-semibold text-stone-800">{{ $menu }}</p>
                 <p class="mt-1 text-xs text-stone-400">Tahap berikutnya</p>

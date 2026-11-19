@@ -159,7 +159,40 @@ npm run build
 php artisan migrate --seed
 ```
 
-Tahap berikutnya: profil sawah, pencatatan pupuk/obat & sewa dengan
-approval, kalender tanam/panen, laporan biaya produksi, dan generate
-surat perjanjian (pemilik ↔ perusahaan). Showcase sewa ditunda sampai
-landing page root dibuat; katalog produk unggulan di-skip dulu.
+Tahap berikutnya: kalender tanam/panen, laporan biaya produksi
+(print), dan generate surat perjanjian (pemilik ↔ perusahaan).
+Showcase sewa ditunda sampai landing page root dibuat; katalog produk
+unggulan di-skip dulu.
+
+## Fase 2 — Pencatatan (proyek, sewa, pupuk/obat, approval)
+
+| Rute | Siapa | Isi |
+|---|---|---|
+| `/admin/projects` | Admin | Daftar proyek & profil sawah + total biaya disetujui |
+| `/admin/projects/{id}` | Admin | Detail proyek: rekap per kategori, form pencatatan, riwayat + tombol setujui/tolak |
+| `/admin/approvals` | Admin | Antrean semua pencatatan pending dari penggarap |
+| `/admin/services` | Admin | Master layanan & tarif (harga normal / member) |
+| `/app/sawah` | Semua role | Daftar sawah sesuai akses (pemilik: miliknya, penggarap: tugasnya, admin: semua) |
+| `/app/sawah/{id}` | Sesuai akses | Detail sawah + riwayat; form tambah hanya untuk penggarap yang ditugaskan & admin |
+
+Aturan pencatatan:
+
+- Kategori: sewa drone, sewa mesin tanam, pupuk, obat/pestisida,
+  tenaga kerja, benih, transportasi, lainnya. Semua menempel ke proyek.
+- **Sewa alat**: harga satuan tidak diinput manual — diambil dari tarif
+  resmi di `/admin/services` mengikuti status membership pemilik sawah
+  (member = harga member, bukan = harga normal), lalu di-snapshot ke
+  catatan. Perubahan tarif tidak mengubah catatan lama.
+- **Approval**: catatan dari perusahaan langsung `approved`; dari
+  penggarap berstatus `pending` dan **tidak dihitung** di total/laporan
+  sampai disetujui. Yang ditolak tersimpan dengan alasan dan tidak
+  dihitung.
+- Total resmi proyek = jumlah `total_price` catatan berstatus approved.
+
+Seeder Fase 2 (`Fase2Seeder`) membuat 3 layanan dummy (Drone Semprot
+Rp300rb/Rp250rb per ha, Mesin Tanam Rp400rb/Rp350rb per ha, Mesin
+Penetas Telur Rp60rb/Rp50rb per hari) dan satu proyek demo
+"Musim Tanam 1 - Sawah Budi" (pemilik Budi — member, penggarap Joko)
+dengan catatan approved senilai **Rp3.400.000** sesuai contoh
+rekapitulasi README Bagian B.4, plus 1 catatan pending dari penggarap
+untuk mencoba alur persetujuan.

@@ -68,6 +68,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ArticleSeeder::class,
+            Fase2Seeder::class,
         ]);
     }
 }
