@@ -11,18 +11,18 @@
         <div class="flex items-center gap-3">
             <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-700 text-lg font-semibold text-white">F</span>
             <div>
-                <h1 class="font-semibold leading-tight text-stone-900">FunFarm Admin</h1>
-                <p class="text-sm text-stone-500">Masuk untuk mengelola artikel</p>
+                <h1 class="font-semibold leading-tight text-stone-900">FunFarm</h1>
+                <p class="text-sm text-stone-500">Masuk ke panel admin atau webapp pencatatan</p>
             </div>
         </div>
 
         <form method="POST" action="{{ route('admin.login.submit') }}" class="mt-6 flex flex-col gap-4">
             @csrf
             <div>
-                <label for="email" class="mb-1.5 block text-sm font-medium text-stone-700">Email</label>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
+                <label for="login" class="mb-1.5 block text-sm font-medium text-stone-700">Email atau Username</label>
+                <input id="login" type="text" name="login" value="{{ old('login') }}" required autofocus autocomplete="username"
                        class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
-                @error('email')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                @error('login')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label for="password" class="mb-1.5 block text-sm font-medium text-stone-700">Password</label>
