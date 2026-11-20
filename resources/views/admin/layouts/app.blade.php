@@ -12,6 +12,11 @@
     <div id="admin-menu-backdrop" class="invisible fixed inset-0 z-30 bg-stone-950/40 opacity-0 transition-opacity duration-300 lg:hidden"></div>
     <header class="fixed inset-x-0 top-0 z-40 border-b border-stone-200 bg-white shadow-md">
         <div class="mx-auto flex max-w-6xl items-center gap-x-6 px-5 py-3">
+            {{-- Mode mobile/webapp: tombol buka/tutup drawer di kiri atas (tampil di bawah lg) --}}
+            <button type="button" id="admin-menu-button" class="-ml-1 inline-flex items-center justify-center rounded-lg border border-stone-300 p-2 text-stone-700 transition hover:bg-stone-50 lg:hidden" aria-expanded="false" aria-controls="admin-mobile-menu" aria-label="Buka atau tutup menu navigasi">
+                <svg id="admin-menu-icon-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" /></svg>
+                <svg id="admin-menu-icon-close" xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
             <a href="{{ route('admin.articles.index') }}" class="flex items-center gap-2.5">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-700 font-semibold text-white">F</span>
                 <span class="font-semibold text-stone-900">FunFarm <span class="font-normal text-stone-500">Admin</span></span>
@@ -39,18 +44,13 @@
                 </form>
             </div>
 
-            {{-- Mode mobile/webapp: tombol hamburger (tampil di bawah lg) --}}
-            <button type="button" id="admin-menu-button" class="ml-auto inline-flex items-center justify-center rounded-lg border border-stone-300 p-2 text-stone-700 transition hover:bg-stone-50 lg:hidden" aria-expanded="false" aria-controls="admin-mobile-menu" aria-label="Buka atau tutup menu navigasi">
-                <svg id="admin-menu-icon-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" /></svg>
-                <svg id="admin-menu-icon-close" xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" /></svg>
-            </button>
         </div>
 
-        {{-- Drawer menu mobile: melayang dari sisi kanan dengan fade in/out, dibuka dari hamburger --}}
-        <nav id="admin-mobile-menu" class="invisible fixed inset-y-0 right-0 z-40 w-72 max-w-[85vw] translate-x-full bg-white opacity-0 shadow-2xl transition-all duration-300 ease-out lg:hidden">
+        {{-- Drawer navigasi mobile: laci meluncur dari kiri dengan fade in/out, dibuka dari tombol kiri atas --}}
+        <nav id="admin-mobile-menu" class="invisible fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] -translate-x-full bg-white opacity-0 shadow-2xl transition-all duration-300 ease-out lg:hidden">
             <div class="flex h-full flex-col overflow-y-auto px-5 py-4 text-sm font-medium">
                 <div class="mb-2 flex items-center justify-between px-3">
-                    <span class="font-semibold text-stone-900">Menu</span>
+                    <span class="font-semibold text-stone-900">Navigasi</span>
                     <button type="button" id="admin-menu-close" class="rounded-lg p-1.5 text-stone-500 transition hover:bg-stone-50 hover:text-stone-800" aria-label="Tutup menu navigasi">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" /></svg>
                     </button>
@@ -86,7 +86,7 @@
     </main>
 
     <script>
-        // Toggle drawer hamburger: geser + fade dari kanan untuk navbar mode mobile/webapp.
+        // Toggle drawer navigasi: laci geser + fade dari kiri untuk navbar mode mobile/webapp.
         (function () {
             var button = document.getElementById('admin-menu-button');
             var menu = document.getElementById('admin-mobile-menu');
@@ -95,7 +95,7 @@
             if (!button || !menu) return;
             var iconOpen = document.getElementById('admin-menu-icon-open');
             var iconClose = document.getElementById('admin-menu-icon-close');
-            var menuClosedClasses = ['invisible', 'translate-x-full', 'opacity-0'];
+            var menuClosedClasses = ['invisible', '-translate-x-full', 'opacity-0'];
             var backdropClosedClasses = ['invisible', 'opacity-0'];
             function setOpen(open) {
                 menuClosedClasses.forEach(function (c) { menu.classList.toggle(c, !open); });
