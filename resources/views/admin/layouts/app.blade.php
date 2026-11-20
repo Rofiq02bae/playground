@@ -10,7 +10,7 @@
     @php($pendingNav = \App\Models\ProjectExpense::where('status', 'pending')->count())
     {{-- Backdrop gelap tipis di belakang panel menu mobile (klik untuk menutup) --}}
     <div id="admin-menu-backdrop" class="fixed inset-0 z-30 hidden bg-stone-950/40 lg:hidden"></div>
-    <header class="relative z-40 border-b border-stone-200 bg-white">
+    <header class="fixed inset-x-0 top-0 z-40 border-b border-stone-200 bg-white shadow-md">
         <div class="mx-auto flex max-w-6xl items-center gap-x-6 px-5 py-3">
             <a href="{{ route('admin.articles.index') }}" class="flex items-center gap-2.5">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-700 font-semibold text-white">F</span>
@@ -71,7 +71,7 @@
         </nav>
     </header>
 
-    <main class="mx-auto max-w-6xl px-5 py-8">
+    <main class="mx-auto max-w-6xl px-5 pb-8 pt-24">
         @if (session('success'))
             <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">{{ session('success') }}</div>
         @endif
