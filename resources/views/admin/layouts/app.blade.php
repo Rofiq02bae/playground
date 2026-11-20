@@ -9,7 +9,7 @@
 <body class="min-h-screen bg-stone-100 text-stone-800 antialiased">
     @php($pendingNav = \App\Models\ProjectExpense::where('status', 'pending')->count())
     {{-- Backdrop gelap tipis di belakang drawer menu mobile (klik untuk menutup) --}}
-    <div id="admin-menu-backdrop" class="invisible fixed inset-0 z-30 bg-stone-950/40 opacity-0 transition-opacity duration-300 lg:hidden"></div>
+    <div id="admin-menu-backdrop" class="invisible pointer-events-none fixed inset-0 z-30 bg-stone-950/40 opacity-0 transition-opacity duration-300 lg:hidden"></div>
     <header class="fixed inset-x-0 top-0 z-40 border-b border-stone-200 bg-white shadow-md">
         <div class="mx-auto flex max-w-6xl items-center gap-x-6 px-5 py-3">
             {{-- Mode mobile/webapp: tombol buka/tutup drawer di kiri atas (tampil di bawah lg) --}}
@@ -47,7 +47,7 @@
         </div>
 
         {{-- Drawer navigasi mobile: laci meluncur dari kiri dengan fade in/out, dibuka dari tombol kiri atas --}}
-        <nav id="admin-mobile-menu" class="invisible fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] -translate-x-full bg-white opacity-0 shadow-2xl transition-all duration-300 ease-out lg:hidden">
+        <nav id="admin-mobile-menu" class="invisible pointer-events-none fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] -translate-x-full bg-white opacity-0 shadow-2xl transition-all duration-300 ease-out lg:hidden">
             <div class="flex h-full flex-col overflow-y-auto px-5 py-4 text-sm font-medium">
                 <div class="mb-2 flex items-center justify-between px-3">
                     <span class="font-semibold text-stone-900">Navigasi</span>
@@ -95,8 +95,8 @@
             if (!button || !menu) return;
             var iconOpen = document.getElementById('admin-menu-icon-open');
             var iconClose = document.getElementById('admin-menu-icon-close');
-            var menuClosedClasses = ['invisible', '-translate-x-full', 'opacity-0'];
-            var backdropClosedClasses = ['invisible', 'opacity-0'];
+            var menuClosedClasses = ['invisible', '-translate-x-full', 'opacity-0', 'pointer-events-none'];
+            var backdropClosedClasses = ['invisible', 'opacity-0', 'pointer-events-none'];
             function setOpen(open) {
                 menuClosedClasses.forEach(function (c) { menu.classList.toggle(c, !open); });
                 if (backdrop) backdropClosedClasses.forEach(function (c) { backdrop.classList.toggle(c, !open); });
