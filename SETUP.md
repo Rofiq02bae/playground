@@ -208,6 +208,25 @@ di halaman form/detail proyek — jangan lupa `npm install` lalu
 `npm run build` setelah pull. Peta di-init saat popup pertama dibuka
 + `invalidateSize()` agar tile tidak rusak.
 
+## Fase 2 — Kalender tanam & panen
+
+| Rute | Isi |
+|---|---|
+| `/admin/kalender` | Kalender semua proyek (desktop perusahaan) |
+| `/app/kalender` | Kalender webapp, scoped per role (pemilik: miliknya, penggarap: tugasnya, admin: semua) |
+
+- Event murni **tanggal turunan** dari data yang ada: mulai tanam
+  (`start_date`), estimasi panen (`estimated_harvest_date`), aktivitas
+  pencatatan (tanggal expense). Tanpa library kalender JS — grid Blade
+  + daftar agenda, navigasi `?bulan=YYYY-MM`.
+- Expense **pending** tampil redup dengan badge "Menunggu approval"
+  (tetap tidak dihitung di total resmi); expense ditolak tidak tampil;
+  proyek dibatalkan tidak tampil, proyek selesai tampil redup.
+- Strip **Panen Segera**: estimasi panen <= 7 hari ke depan untuk
+  proyek berstatus berjalan / menunggu panen.
+- Logika bersama di `App\Support\CalendarData`. Belum ada entri manual
+  dan belum ada tanggal panen aktual — itu bagian modul laporan/panen.
+
 ## Fase 2 — Pencatatan (proyek, sewa, pupuk/obat, approval)
 
 | Rute | Siapa | Isi |
