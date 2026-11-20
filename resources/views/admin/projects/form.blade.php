@@ -52,7 +52,7 @@
                 @error('location')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Luas (M²)</label>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">Luas (m²)</label>
                 <input type="number" name="area_size" value="{{ old('area_size', $project->area_size) }}" step="0.01" min="0.01" required
                        class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
                 @error('area_size')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror

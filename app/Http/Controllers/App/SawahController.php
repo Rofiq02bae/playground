@@ -25,18 +25,6 @@ class SawahController extends Controller
         return view('app.sawah.index', ['projects' => $projects]);
     }
 
-    public function profile(){
-        $profiles = AgriculturalProject::query()
-            ->visibleTo(Auth::user())
-            ->with(['owner', 'cultivator'])
-            ->withSum(['expenses as approved_total' => fn ($q) => $q->where('status', ProjectExpense::STATUS_APPROVED)], 'total_price')
-            ->withCount(['expenses as pending_count' => fn ($q) => $q->where('status', ProjectExpense::STATUS_PENDING)])
-            ->latest()
-            ->get();
-
-        return view('app.layouts.app', ['profiles' => $profiles]);
-    }
-
     public function show(AgriculturalProject $project)
     {
         if (! $project->isVisibleTo(Auth::user())) {
