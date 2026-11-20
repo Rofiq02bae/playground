@@ -14,8 +14,14 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
+
         return view('app.home', [
-            'user' => Auth::user(),
+            'user' => $user,
+            'agreementCount' => \App\Models\AgriculturalProject::query()
+                ->visibleTo($user)
+                ->whereHas('agreement')
+                ->count(),
         ]);
     }
 }

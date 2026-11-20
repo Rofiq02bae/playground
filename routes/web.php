@@ -63,6 +63,8 @@ Route::prefix('app')->name('app.')->middleware('auth')->group(function (): void 
     Route::get('/sawah', [SawahController::class, 'index'])->name('sawah.index');
     Route::get('/sawah/{project}', [SawahController::class, 'show'])->name('sawah.show');
     Route::get('/kalender', [\App\Http\Controllers\App\CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/surat-perjanjian', [\App\Http\Controllers\App\AgreementController::class, 'index'])->name('agreements.index');
+    Route::get('/surat-perjanjian/{project}/unduh', [\App\Http\Controllers\App\AgreementController::class, 'download'])->name('agreements.download');
     Route::get('/laporan', [\App\Http\Controllers\App\ReportController::class, 'index'])->name('reports.index');
     Route::get('/laporan/{project}', [\App\Http\Controllers\App\ReportController::class, 'show'])->name('reports.show');
     Route::post('/sawah/{project}/expenses', [SawahController::class, 'storeExpense'])->name('sawah.expenses.store');
