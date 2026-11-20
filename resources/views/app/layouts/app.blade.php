@@ -34,7 +34,6 @@
         <div class="mx-auto grid max-w-3xl grid-cols-5 text-center text-xs font-medium text-stone-600">
             <a href="{{ route('app.home') }}" class="px-2 py-3 text-emerald-800">Beranda</a>
             <a href="{{ route('app.sawah.index',) }}" class="px-2 py-3 hover:text-emerald-800">Sawah</a>
-            <a href="{{ route('app.sawah.index') }}" class="px-2 py-3 hover:text-emerald-800">Catatan</a>
             <a href="{{ route('app.calendar.index') }}" class="px-2 py-3 hover:text-emerald-800">Kalender</a>
             @if (auth()->user()->isPenggarap())
                 <span class="px-2 py-3 text-stone-400">Laporan</span>
