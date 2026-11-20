@@ -5,7 +5,7 @@
 @section('content')
     <div class="rounded-2xl border border-stone-200 bg-white p-5">
         <h1 class="text-lg font-semibold text-stone-900">Halo, {{ $user->name }}</h1>
-        <p class="mt-1 text-sm text-stone-500">Halo <strong class="text-stone-700">{{ $user->roleLabel() }}</strong>.</p>
+        <p class="mt-1 text-sm text-stone-500">Anda masuk sebagai <strong class="text-stone-700">{{ $user->roleLabel() }}</strong>.</p>
 
         @if ($user->isPemilik())
             <p class="mt-3 inline-block rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">Status: {{ $user->membershipLabel() }}{{ $user->is_member ? ' — harga sewa dapat potongan' : ' — harga sewa normal' }}</p>
@@ -29,14 +29,17 @@
         </a>
         <a href="{{ route('app.calendar.index') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
             <p class="text-sm font-semibold text-emerald-900">Kalender Tanam &amp; Panen</p>
+            <p class="mt-1 text-xs text-stone-500">Jadwal tanam, catatan &amp; estimasi panen</p>
         </a>
-        <a href="{{ route('app.reports.index') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
-            <p class="text-sm font-semibold text-emerald-900">Laporan Biaya Produksi</p>
-            <p class="mt-1 text-xs text-stone-500">laporan pengeluaran dan pemasukan</p>
-        </a>
-        <a href="{{ route('') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
+        @unless ($user->isPenggarap())
+            <a href="{{ route('app.reports.index') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
+                <p class="text-sm font-semibold text-emerald-900">Laporan Biaya Produksi</p>
+                <p class="mt-1 text-xs text-stone-500">Biaya, hasil panen &amp; bagi hasil</p>
+            </a>
+        @endunless
+        <a href="{{ route('app.agreements.index') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
             <p class="text-sm font-semibold text-emerald-900">Surat Perjanjian</p>
-            <p class="mt-1 text-xs text-stone-500">surat perjanjian penggarapan sawah</p>
+            <p class="mt-1 text-xs text-stone-500">{{ $agreementCount > 0 ? $agreementCount.' surat siap diunduh' : 'Lihat & unduh surat dari perusahaan' }}</p>
         </a>
     </div>
 @endsection
