@@ -68,6 +68,23 @@
                 </div>
             </div>
 
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="nik" class="mb-1.5 block text-sm font-medium text-stone-700">NIK / Nomor KTP (opsional)</label>
+                    <input id="nik" type="text" name="nik" value="{{ old('nik', $user->nik) }}"
+                           class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
+                    <p class="mt-1.5 text-xs text-stone-400">Untuk surat perjanjian. Bila diisi akan tampil di surat; bila kosong, baris NIK tidak ditampilkan.</p>
+                    @error('nik')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label for="occupation" class="mb-1.5 block text-sm font-medium text-stone-700">Pekerjaan (opsional)</label>
+                    <input id="occupation" type="text" name="occupation" value="{{ old('occupation', $user->occupation) }}"
+                           class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
+                    <p class="mt-1.5 text-xs text-stone-400">Untuk surat perjanjian, diperlakukan sama seperti NIK.</p>
+                    @error('occupation')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+            </div>
+
             <fieldset class="rounded-xl border border-stone-200 p-4">
                 <legend class="px-1 text-sm font-medium text-stone-700">Alamat (sesuai identitas)</legend>
                 <div class="grid gap-4 sm:grid-cols-2">

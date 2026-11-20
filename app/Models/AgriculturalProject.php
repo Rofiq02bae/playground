@@ -7,15 +7,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'name', 'owner_id', 'cultivator_id', 'field_name', 'location', 'area_size',
     'coordinates', 'boundary_geojson', 'crop_type', 'crop_variety', 'start_date',
     'estimated_harvest_date', 'status', 'profit_share_company_percent', 'created_by',
+    'rental_type', 'duration_years', 'lease_end_date', 'annual_rental_price',
 ])]
 class AgriculturalProject extends Model
 {
     public const STATUSES = ['persiapan', 'berjalan', 'menunggu_panen', 'selesai', 'dibatalkan'];
+
+    public const RENTAL_TYPES = ['bagi_hasil', 'tahunan'];
 
     protected function casts(): array
     {
@@ -24,8 +28,26 @@ class AgriculturalProject extends Model
             'boundary_geojson' => 'array',
             'start_date' => 'date',
             'estimated_harvest_date' => 'date',
+            'lease_end_date' => 'date',
             'profit_share_company_percent' => 'integer',
+            'duration_years' => 'integer',
+            'annual_rental_price' => 'integer',
         ];
+    }
+
+    public function agreement(): HasOne
+    {
+        return $this->hasOne(Agreement::class, 'project_id');
+    }
+
+    public function isBagiHasil(): bool
+    {
+        return $this->rental_type !== 'tahunan';
+    }
+
+    public function rentalTypeLabel(): string
+    {
+        return $this->isBagiHasil() ? 'Sewa Bagi Hasil' : 'Sewa Tahunan';
     }
 
     public function owner(): BelongsTo

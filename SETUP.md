@@ -281,3 +281,41 @@ Penetas Telur Rp60rb/Rp50rb per hari) dan satu proyek demo
 dengan catatan approved senilai **Rp3.400.000** sesuai contoh
 rekapitulasi README Bagian B.4, plus 1 catatan pending dari penggarap
 untuk mencoba alur persetujuan.
+
+## Fase 2 — Jenis sewa proyek & surat perjanjian
+
+Form proyek (`/admin/projects/create`) punya radio **Jenis sewa**:
+
+- **Sewa Bagi Hasil** — tombol "Cek Kelengkapan Surat Perjanjian"
+  membuka modal berisi daftar cek data surat (dari data pemilik +
+  isian form) dan isian nama **Saksi 1** (Perangkat Desa / Ketua
+  Kelompok Tani) & **Saksi 2** (Keluarga / Tetangga Batas Lahan).
+  Bila kedua saksi terisi, PDF surat dibuat otomatis saat proyek
+  disimpan; bila belum, surat bisa dibuat menyusul dari bagian
+  "Surat Perjanjian" di detail proyek. PDF tersimpan di
+  `storage/app/private/agreements/` dan bisa **diunduh kapan pun**
+  dari detail proyek (satu proyek = satu surat, nomor tidak berubah).
+  - Data perusahaan (PIHAK KEDUA: PT SARANA AKSES ADIKARYA) dan
+    **format nomor surat diatur di `config/perjanjian.php`** — ubah
+    di file itu bila template perusahaan berubah.
+  - PDF: kertas A4, font Times (12pt, justify), library dompdf.
+  - NIK & pekerjaan pemilik **opsional** (field di form pengguna):
+    barisnya tampil di surat hanya bila terisi.
+  - Luas lahan dicetak dalam m² (konversi otomatis dari hektar),
+    tempat penandatanganan dari wilayah alamat pemilik, jangka
+    waktu surat dari tanggal mulai s/d estimasi panen, persen
+    Pasal 3 dari field bagi hasil (pemilik = 100% − perusahaan).
+- **Sewa Tahunan** — tanpa surat perjanjian. Tanggal mulai wajib,
+  jangka waktu dipilih dari dropdown 1–5 tahun dan tanggal akhir
+  sewa dihitung otomatis. Ada field **harga sewa per tahun** yang
+  sifatnya **sementara** (perusahaan belum menetapkan harga pasti —
+  perlu validasi ulang).
+
+Setelah `git pull` untuk perubahan ini, jalankan:
+
+```bash
+composer install   # ada dependency baru: barryvdh/laravel-dompdf
+npm install
+npm run build
+php artisan migrate
+```

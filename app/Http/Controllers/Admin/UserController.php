@@ -103,6 +103,8 @@ class UserController extends Controller
             'username' => ['required_without:email', 'nullable', 'string', 'max:50', 'alpha_dash', Rule::unique('users', 'username')->ignore($user?->id)],
             'email' => ['required_without:username', 'nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
             'phone' => ['nullable', 'string', 'max:30'],
+            'nik' => ['nullable', 'string', 'max:20'],
+            'occupation' => ['nullable', 'string', 'max:255'],
             'province_code' => ['nullable', 'string', 'max:13', Rule::exists('regions', 'kode')],
             'regency_code' => ['nullable', 'string', 'max:13', Rule::exists('regions', 'kode')],
             'district_code' => ['nullable', 'string', 'max:13', Rule::exists('regions', 'kode')],

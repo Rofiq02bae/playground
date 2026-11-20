@@ -8,7 +8,11 @@
             <h1 class="text-xl font-semibold text-stone-900">{{ $project->name }}</h1>
             <p class="text-sm text-stone-500">{{ $project->field_name }} &middot; {{ $project->location }} &middot; {{ number_format($project->area_size, 2, ',', '.') }} ha &middot; {{ $project->crop_type }}{{ $project->crop_variety ? ' ('.$project->crop_variety.')' : '' }}</p>
             <p class="mt-1 text-sm text-stone-500">Pemilik: <strong class="text-stone-700">{{ $project->owner->name }}</strong> ({{ $project->owner->membershipLabel() }}) &middot; Penggarap: <strong class="text-stone-700">{{ $project->cultivator?->name ?? '-' }}</strong> &middot; Status: {{ $project->statusLabel() }}</p>
-            <p class="text-sm text-stone-500">Mulai {{ $project->start_date->format('d M Y') }} &middot; Estimasi panen {{ $project->estimated_harvest_date?->format('d M Y') ?? '-' }} &middot; Bagi hasil perusahaan {{ $project->profit_share_company_percent }}%</p>
+            @if ($project->isBagiHasil())
+                <p class="text-sm text-stone-500">{{ $project->rentalTypeLabel() }} &middot; Mulai {{ $project->start_date->format('d M Y') }} &middot; Estimasi panen {{ $project->estimated_harvest_date?->format('d M Y') ?? '-' }} &middot; Bagi hasil perusahaan {{ $project->profit_share_company_percent }}%</p>
+            @else
+                <p class="text-sm text-stone-500">{{ $project->rentalTypeLabel() }} {{ $project->duration_years }} tahun &middot; Mulai {{ $project->start_date->format('d M Y') }} &middot; Akhir sewa {{ $project->lease_end_date?->format('d M Y') ?? '-' }}@if ($project->annual_rental_price) &middot; Harga Rp{{ number_format($project->annual_rental_price, 0, ',', '.') }}/tahun @endif</p>
+            @endif
         </div>
         <div class="ml-auto flex gap-2">
             <a href="{{ route('admin.reports.show', $project) }}" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800">Lihat Laporan</a>
@@ -19,6 +23,58 @@
     <div class="mb-6">
         @include('partials.field-map-display', ['project' => $project])
     </div>
+
+    @if ($project->isBagiHasil())
+        <div class="mb-6 rounded-2xl border border-stone-200 bg-white p-5">
+            <div class="flex flex-wrap items-start gap-3">
+                <div>
+                    <h2 class="font-semibold text-stone-900">Surat Perjanjian Kerja Sama Garap Lahan</h2>
+                    <p class="text-xs text-stone-500">Antara pemilik sawah dan {{ config('perjanjian.company_name') }} (PIHAK KEDUA).</p>
+                </div>
+                @if ($project->agreement)
+                    <a href="{{ route('admin.projects.agreement.download', $project) }}" class="ml-auto rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800">Unduh PDF Surat</a>
+                @endif
+            </div>
+            @if ($project->agreement)
+                <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                    <div><dt class="text-xs uppercase tracking-wide text-stone-400">Nomor Surat</dt><dd class="mt-0.5 font-medium text-stone-800">{{ $project->agreement->number }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-stone-400">Tanggal Surat</dt><dd class="mt-0.5 font-medium text-stone-800">{{ $project->agreement->agreement_date->format('d M Y') }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-stone-400">Saksi 1</dt><dd class="mt-0.5 font-medium text-stone-800">{{ $project->agreement->witness1_name }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-stone-400">Saksi 2</dt><dd class="mt-0.5 font-medium text-stone-800">{{ $project->agreement->witness2_name }}</dd></div>
+                </dl>
+                <p class="mt-3 text-xs text-stone-400">PDF tersimpan di sistem dan bisa diunduh ulang kapan pun dari tombol di atas.</p>
+            @else
+                @if ($letterData && ! $letterData['complete'])
+                    <div class="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        <p class="font-medium">Data surat belum lengkap:</p>
+                        <ul class="mt-1 list-inside list-disc">
+                            @foreach ($letterData['checklist'] as $item)
+                                @unless ($item['filled'])<li>{{ $item['label'] }}</li>@endunless
+                            @endforeach
+                        </ul>
+                        <p class="mt-1 text-xs">Lengkapi lewat Ubah Profil proyek / data pemilik. Surat tetap bisa dibuat, tetapi bagian yang kosong akan tampil kosong di PDF.</p>
+                    </div>
+                @endif
+                <form method="POST" action="{{ route('admin.projects.agreement.store', $project) }}" class="mt-4">
+                    @csrf
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Nama Saksi 1</label>
+                            <input type="text" name="witness1_name" required placeholder="Perangkat Desa / Ketua Kelompok Tani"
+                                   class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Nama Saksi 2</label>
+                            <input type="text" name="witness2_name" required placeholder="Keluarga / Tetangga Batas Lahan"
+                                   class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">
+                        </div>
+                    </div>
+                    <button type="submit" class="mt-4 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800">Generate Surat Perjanjian (PDF)</button>
+                    <p class="mt-2 text-xs text-stone-400">Nomor surat berikutnya: {{ \App\Support\AgreementGenerator::nextNumber() }} — nomor terbit sekali dan tersimpan bersama PDF-nya.</p>
+                </form>
+            @endif
+        </div>
+    @endif
 
     <div class="mb-6 grid gap-4 sm:grid-cols-3">
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">

@@ -41,27 +41,56 @@ class ProjectController extends Controller
 
     public function create()
     {
+        $owners = User::where('role', User::ROLE_PEMILIK)
+            ->with(['province', 'regency', 'district', 'village'])
+            ->orderBy('name')->get();
+
         return view('admin.projects.form', [
-            'project' => new AgriculturalProject(['status' => 'persiapan', 'profit_share_company_percent' => 50]),
-            'owners' => User::where('role', User::ROLE_PEMILIK)->orderBy('name')->get(),
+            'project' => new AgriculturalProject(['status' => 'persiapan', 'profit_share_company_percent' => 50, 'rental_type' => 'bagi_hasil']),
+            'owners' => $owners,
             'cultivators' => User::where('role', User::ROLE_PENGGARAP)->orderBy('name')->get(),
             'statuses' => AgriculturalProject::STATUSES,
+            'ownersData' => $owners->map(fn (User $o) => [
+                'id' => $o->id,
+                'name' => $o->name,
+                'nik' => $o->nik,
+                'occupation' => $o->occupation,
+                'address' => $o->address,
+                'place' => collect([$o->village?->nama, $o->district ? 'Kec. '.$o->district->nama : null, $o->regency?->nama])->filter()->implode(', '),
+            ])->values(),
+            'nextNumber' => \App\Support\AgreementGenerator::nextNumber(),
         ]);
     }
 
     public function store(Request $request)
     {
         $data = $this->validateProject($request);
+        $witness1 = $data['witness1_name'] ?? null;
+        $witness2 = $data['witness2_name'] ?? null;
+        unset($data['witness1_name'], $data['witness2_name']);
         $data['created_by'] = Auth::id();
 
         $project = AgriculturalProject::create($data);
 
-        return redirect()->route('admin.projects.show', $project)->with('success', 'Proyek & profil sawah berhasil dibuat.');
+        $message = 'Proyek & profil sawah berhasil dibuat.';
+
+        // Sewa bagi hasil + nama saksi lengkap dari modal -> surat langsung dibuat & disimpan.
+        if ($project->isBagiHasil() && filled($witness1) && filled($witness2)) {
+            try {
+                $agreement = \App\Support\AgreementGenerator::generate($project, $witness1, $witness2, Auth::user());
+                $message .= " Surat perjanjian nomor {$agreement->number} berhasil dibuat — unduh PDF-nya di halaman ini.";
+            } catch (\Throwable $e) {
+                report($e);
+                $message .= ' Namun pembuatan surat perjanjian gagal; buat menyusul lewat bagian Surat Perjanjian di halaman ini.';
+            }
+        }
+
+        return redirect()->route('admin.projects.show', $project)->with('success', $message);
     }
 
     public function show(AgriculturalProject $project)
     {
-        $project->load(['owner', 'cultivator']);
+        $project->load(['owner', 'cultivator', 'agreement']);
 
         $expenses = $project->expenses()->with(['creator', 'service'])->latest('date')->latest()->paginate(20);
 
@@ -78,6 +107,9 @@ class ProjectController extends Controller
             'categories' => ProjectExpense::CATEGORIES,
             'services' => \App\Models\Service::where('is_active', true)->get(),
             'harvests' => $project->harvests()->with('creator')->orderBy('harvest_date')->get(),
+            'letterData' => $project->isBagiHasil() && ! $project->agreement
+                ? \App\Support\AgreementGenerator::letterData($project)
+                : null,
         ]);
     }
 
@@ -93,7 +125,9 @@ class ProjectController extends Controller
 
     public function update(Request $request, AgriculturalProject $project)
     {
-        $project->update($this->validateProject($request));
+        $data = $this->validateProject($request);
+        unset($data['witness1_name'], $data['witness2_name']);
+        $project->update($data);
 
         return redirect()->route('admin.projects.show', $project)->with('success', 'Proyek berhasil diperbarui.');
     }
@@ -139,12 +173,29 @@ class ProjectController extends Controller
             'start_date' => ['required', 'date'],
             'estimated_harvest_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'status' => ['required', Rule::in(AgriculturalProject::STATUSES)],
-            'profit_share_company_percent' => ['required', 'integer', 'min:0', 'max:100'],
+            'rental_type' => ['required', Rule::in(AgriculturalProject::RENTAL_TYPES)],
+            'duration_years' => ['nullable', 'required_if:rental_type,tahunan', 'integer', 'min:1', 'max:5'],
+            'annual_rental_price' => ['nullable', 'integer', 'min:0'],
+            'profit_share_company_percent' => ['nullable', 'required_if:rental_type,bagi_hasil', 'integer', 'min:0', 'max:100'],
+            'witness1_name' => ['nullable', 'string', 'max:255'],
+            'witness2_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         $data['boundary_geojson'] = ! empty($data['boundary_geojson'])
             ? json_decode($data['boundary_geojson'], true)
             : null;
+
+        if (($data['rental_type'] ?? 'bagi_hasil') === 'tahunan') {
+            // Sewa tahunan: akhir sewa = tanggal mulai + durasi; bagi hasil tidak berlaku.
+            $data['lease_end_date'] = \Carbon\Carbon::parse($data['start_date'])
+                ->addYears((int) $data['duration_years'])->toDateString();
+            $data['estimated_harvest_date'] = null;
+            $data['profit_share_company_percent'] = 0;
+        } else {
+            $data['duration_years'] = null;
+            $data['lease_end_date'] = null;
+            $data['annual_rental_price'] = null;
+        }
 
         return $data;
     }

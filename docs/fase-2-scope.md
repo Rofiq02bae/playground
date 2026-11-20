@@ -16,7 +16,15 @@ estimated_harvest_date, tanggal expense) sesuai konfirmasi user
 2026-11-20 — tanpa entri manual. Laporan sesuai rekomendasi yang
 disetujui user 2026-11-20: sampai bagi hasil, tabel `harvest_records`
 multi-panen, rekap global + per proyek siap cetak, pemilik bisa lihat
-laporannya di webapp (penggarap tidak). Sisa Fase 2: surat perjanjian.**
+laporannya di webapp (penggarap tidak). Surat perjanjian SELESAI
+2026-11-20: form proyek punya radio jenis sewa — Bagi Hasil (modal cek
+kelengkapan surat + nama saksi, PDF A4 Times 12 justify via dompdf,
+nomor mengikuti pola di `config/perjanjian.php`, PDF tersimpan &
+tombol unduh di detail proyek) dan Tahunan (tanggal mulai wajib +
+dropdown durasi 1–5 tahun, akhir sewa otomatis, field harga sewa
+per tahun SEMENTARA — user akan memvalidasi ulang harganya). NIK &
+pekerjaan pemilik opsional: tampil di surat hanya bila terisi.
+Dengan ini seluruh scope Fase 2 (pencatatan) SELESAI.**
 
 ## Yang dibangun sekarang — HANYA pencatatan
 
@@ -137,8 +145,8 @@ termasuk blog dan webapp pencatatan. Role selain admin sesuai breakdown di atas
 1. **Fondasi user & role** — ✅ SELESAI (`a5fdd82`).
 2. Profil sawah & pencatatan pupuk/obat/sewa + approval — ✅ SELESAI
    (`24abb40`); dropdown alamat wilayah — ✅ SELESAI (`3e7af88`).
-3. Kalender tanam/panen + laporan biaya — BELUM, menunggu pilihan user.
-4. Surat perjanjian — BELUM, menunggu pilihan user.
+3. Kalender tanam/panen + laporan biaya — ✅ SELESAI (`94e02e1`, `0c5cb82`).
+4. Surat perjanjian — ✅ SELESAI (2026-11-20, template resmi dari user).
 5. Showcase & landing page — proyek terpisah, menyusul.
 
 ## Yang masih perlu jawaban user sebelum / saat bangun

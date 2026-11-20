@@ -32,6 +32,8 @@ class DatabaseSeeder extends Seeder
                 'email' => 'budi@funfarm.local',
                 'role' => User::ROLE_PEMILIK,
                 'phone' => '081200000001',
+                'nik' => '3404010101800001',
+                'occupation' => 'Petani',
                 'address' => 'Dusun Krajan, Desa Sukamaju',
                 'is_member' => true,
                 'password' => Hash::make('pemilik123'),
