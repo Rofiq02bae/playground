@@ -13,7 +13,7 @@
         </dl>
     </div>
 
-    <h2 class="mt-5 text-sm font-semibold uppercase tracking-wide text-stone-500">Rincian Biaya Produksi (Disetujui)</h2>
+    <h2 class="mt-5 text-sm font-semibold uppercase tracking-wide text-stone-500">Rincian Biaya Produksi</h2>
     <table class="mt-2 w-full text-left text-sm">
         <thead>
             <tr class="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-500">
@@ -82,7 +82,7 @@
                 <div class="flex justify-between"><dt class="text-stone-600">Bagian perusahaan ({{ $companyPercent }}%)</dt><dd class="font-semibold text-stone-900">Rp{{ number_format($companyShare, 0, ',', '.') }}</dd></div>
                 <div class="flex justify-between"><dt class="text-stone-600">Bagian pemilik ({{ 100 - $companyPercent }}%)</dt><dd class="font-semibold text-stone-900">Rp{{ number_format($ownerShare, 0, ',', '.') }}</dd></div>
             @else
-                <p class="text-xs text-stone-500">Belum ada laba bersih untuk dibagi{{ $harvestRevenue === 0 ? ' — panen belum dicatat atau belum terjual' : '' }}.</p>
+                <p class="text-xs text-stone-500">-</p>
             @endif
         </dl>
     </div>
