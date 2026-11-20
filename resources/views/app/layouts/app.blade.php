@@ -35,11 +35,7 @@
             <a href="{{ route('app.home') }}" class="px-2 py-3 text-emerald-800">Beranda</a>
             <a href="{{ route('app.sawah.index',) }}" class="px-2 py-3 hover:text-emerald-800">Sawah</a>
             <a href="{{ route('app.calendar.index') }}" class="px-2 py-3 hover:text-emerald-800">Kalender</a>
-            @if (auth()->user()->isPenggarap())
-                <span class="px-2 py-3 text-stone-400">Laporan</span>
-            @else
-                <a href="{{ route('app.reports.index') }}" class="px-2 py-3 hover:text-emerald-800">Laporan</a>
-            @endif
+            <a href="{{ route('app.reports.index') }}" class="px-2 py-3 hover:text-emerald-800">Laporan</a>
         </div>
     </nav>
 </body>
