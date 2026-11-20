@@ -227,6 +227,28 @@ di halaman form/detail proyek — jangan lupa `npm install` lalu
 - Logika bersama di `App\Support\CalendarData`. Belum ada entri manual
   dan belum ada tanggal panen aktual — itu bagian modul laporan/panen.
 
+## Fase 2 — Laporan biaya produksi & bagi hasil
+
+| Rute | Isi |
+|---|---|
+| `/admin/laporan` | Rekap semua proyek: biaya, hasil panen, laba bersih, bagi hasil + total keseluruhan |
+| `/admin/laporan/{project}` | Laporan per proyek siap cetak (tombol Cetak / Simpan PDF, layout print-friendly) |
+| `/app/laporan` | Daftar laporan webapp — pemilik: proyeknya sendiri; penggarap: ditolak (403) |
+| `/app/laporan/{project}` | Laporan per proyek di webapp (pemilik lain: 404) |
+
+- **Data panen** dicatat admin di detail proyek (`/admin/projects/{id}`,
+  bagian Hasil Panen): tanggal, hasil (kg), harga jual per kg — bisa
+  **multi-panen/bertahap**, tersimpan di tabel `harvest_records`,
+  `total_revenue = quantity_kg x unit_price`.
+- **Aturan angka** (`App\Support\ProjectReport`): biaya = hanya expense
+  **approved** (pending hanya info, tidak dihitung); laba bersih =
+  total hasil panen − total biaya; bagi hasil dari laba bersih positif
+  memakai `profit_share_company_percent` proyek — kalau belum ada laba,
+  bagian perusahaan 0. Contoh README B.4 terverifikasi: biaya
+  Rp3.400.000, panen 2.500 kg x Rp6.000 = Rp15.000.000, bersih
+  Rp11.600.000, bagi hasil 50:50 = Rp5.800.000 per pihak (panen contoh
+  ini ikut di-seed di proyek demo).
+
 ## Fase 2 — Pencatatan (proyek, sewa, pupuk/obat, approval)
 
 | Rute | Siapa | Isi |

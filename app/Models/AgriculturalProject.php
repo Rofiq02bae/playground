@@ -38,6 +38,11 @@ class AgriculturalProject extends Model
         return $this->belongsTo(User::class, 'cultivator_id');
     }
 
+    public function harvests(): HasMany
+    {
+        return $this->hasMany(HarvestRecord::class, 'project_id');
+    }
+
     public function expenses(): HasMany
     {
         return $this->hasMany(ProjectExpense::class, 'project_id');

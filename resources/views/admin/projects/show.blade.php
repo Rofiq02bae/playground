@@ -10,7 +10,10 @@
             <p class="mt-1 text-sm text-stone-500">Pemilik: <strong class="text-stone-700">{{ $project->owner->name }}</strong> ({{ $project->owner->membershipLabel() }}) &middot; Penggarap: <strong class="text-stone-700">{{ $project->cultivator?->name ?? '-' }}</strong> &middot; Status: {{ $project->statusLabel() }}</p>
             <p class="text-sm text-stone-500">Mulai {{ $project->start_date->format('d M Y') }} &middot; Estimasi panen {{ $project->estimated_harvest_date?->format('d M Y') ?? '-' }} &middot; Bagi hasil perusahaan {{ $project->profit_share_company_percent }}%</p>
         </div>
-        <a href="{{ route('admin.projects.edit', $project) }}" class="ml-auto rounded-xl border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50">Ubah Profil</a>
+        <div class="ml-auto flex gap-2">
+            <a href="{{ route('admin.reports.show', $project) }}" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800">Lihat Laporan</a>
+            <a href="{{ route('admin.projects.edit', $project) }}" class="rounded-xl border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50">Ubah Profil</a>
+        </div>
     </div>
 
     <div class="mb-6">
@@ -38,6 +41,70 @@
 
     <div class="mb-6">
         @include('partials.expense-form', ['action' => route('admin.projects.expenses.store', $project)])
+    </div>
+
+    <div class="mb-6 rounded-2xl border border-stone-200 bg-white p-5">
+        <h2 class="font-semibold text-stone-900">Hasil Panen</h2>
+        <p class="mb-4 text-sm text-stone-500">Catat setiap panen (bisa bertahap). Total hasil dipakai di laporan untuk laba bersih &amp; bagi hasil.</p>
+
+        @if ($harvests->isNotEmpty())
+            <div class="mb-4 overflow-x-auto">
+                <table class="w-full min-w-[560px] text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-500">
+                            <th class="py-2 pr-3 font-semibold">Tanggal</th>
+                            <th class="py-2 pr-3 font-semibold">Hasil</th>
+                            <th class="py-2 pr-3 font-semibold">Harga / kg</th>
+                            <th class="py-2 pr-3 text-right font-semibold">Total</th>
+                            <th class="py-2 text-right font-semibold">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($harvests as $harvest)
+                            <tr class="border-b border-stone-100 last:border-0">
+                                <td class="py-2 pr-3 text-stone-600">{{ $harvest->harvest_date->format('d M Y') }}</td>
+                                <td class="py-2 pr-3 text-stone-700">{{ number_format($harvest->quantity_kg, 2, ',', '.') }} kg</td>
+                                <td class="py-2 pr-3 text-stone-700">Rp{{ number_format($harvest->unit_price, 0, ',', '.') }}</td>
+                                <td class="py-2 pr-3 text-right font-medium text-stone-900">Rp{{ number_format($harvest->total_revenue, 0, ',', '.') }}</td>
+                                <td class="py-2 text-right">
+                                    <form method="POST" action="{{ route('admin.harvests.destroy', $harvest) }}" onsubmit="return confirm('Hapus catatan panen ini?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-sm font-medium text-red-600 hover:underline">Hapus</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                        <tr>
+                            <td colspan="3" class="py-2 pr-3 text-right text-sm font-medium text-stone-500">Total hasil panen</td>
+                            <td class="py-2 pr-3 text-right font-bold text-emerald-800">Rp{{ number_format($harvests->sum('total_revenue'), 0, ',', '.') }}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('admin.projects.harvests.store', $project) }}" class="grid gap-3 sm:grid-cols-4">
+            @csrf
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">Tanggal panen</label>
+                <input type="date" name="harvest_date" required class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">Hasil (kg)</label>
+                <input type="number" name="quantity_kg" step="0.01" min="0.01" required placeholder="2500" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">Harga jual / kg (Rp)</label>
+                <input type="number" name="unit_price" step="1" min="0" required placeholder="6000" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800">Catat Panen</button>
+            </div>
+            <div class="sm:col-span-4">
+                <input type="text" name="notes" placeholder="Catatan (opsional), cth: gabah kering panen" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
+            </div>
+        </form>
     </div>
 
     <h2 class="mb-3 font-semibold text-stone-900">Riwayat Pencatatan</h2>

@@ -42,6 +42,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::resource('services', AdminServiceController::class)->except(['show']);
         Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
         Route::get('/kalender', [\App\Http\Controllers\Admin\CalendarController::class, 'index'])->name('calendar.index');
+        Route::get('/laporan', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+        Route::get('/laporan/{project}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
+        Route::post('/projects/{project}/harvests', [\App\Http\Controllers\Admin\HarvestController::class, 'store'])->name('projects.harvests.store');
+        Route::delete('/harvests/{harvest}', [\App\Http\Controllers\Admin\HarvestController::class, 'destroy'])->name('harvests.destroy');
         Route::post('/projects/{project}/expenses', [AdminExpenseController::class, 'store'])->name('projects.expenses.store');
         Route::post('/expenses/{expense}/approve', [AdminExpenseController::class, 'approve'])->name('expenses.approve');
         Route::post('/expenses/{expense}/reject', [AdminExpenseController::class, 'reject'])->name('expenses.reject');
@@ -57,5 +61,7 @@ Route::prefix('app')->name('app.')->middleware('auth')->group(function (): void 
     Route::get('/sawah', [SawahController::class, 'index'])->name('sawah.index');
     Route::get('/sawah/{project}', [SawahController::class, 'show'])->name('sawah.show');
     Route::get('/kalender', [\App\Http\Controllers\App\CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/laporan', [\App\Http\Controllers\App\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/laporan/{project}', [\App\Http\Controllers\App\ReportController::class, 'show'])->name('reports.show');
     Route::post('/sawah/{project}/expenses', [SawahController::class, 'storeExpense'])->name('sawah.expenses.store');
 });

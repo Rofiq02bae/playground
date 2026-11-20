@@ -77,6 +77,7 @@ class ProjectController extends Controller
             'approvedTotal' => $project->approvedTotal(),
             'categories' => ProjectExpense::CATEGORIES,
             'services' => \App\Models\Service::where('is_active', true)->get(),
+            'harvests' => $project->harvests()->with('creator')->orderBy('harvest_date')->get(),
         ]);
     }
 

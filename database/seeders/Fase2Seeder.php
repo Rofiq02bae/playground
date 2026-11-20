@@ -104,5 +104,18 @@ class Fase2Seeder extends Seeder
                 'approved_at' => null,
             ]
         );
+
+        // Contoh hasil panen sesuai README B.4: 2.500 kg x Rp6.000 = Rp15.000.000,
+        // sehingga laba bersih Rp11.600.000 dan bagi hasil 50:50 = Rp5.800.000 per pihak.
+        \App\Models\HarvestRecord::updateOrCreate(
+            ['project_id' => $project->id, 'harvest_date' => '2027-02-15'],
+            [
+                'quantity_kg' => 2500,
+                'unit_price' => 6000,
+                'total_revenue' => 15000000,
+                'notes' => 'Gabah kering panen',
+                'created_by' => $admin->id,
+            ]
+        );
     }
 }

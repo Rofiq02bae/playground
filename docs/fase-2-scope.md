@@ -9,12 +9,14 @@ sudah dibangun hari itu juga** — dokumen ini jadi catatan pengunci keputusan,
 bukan lagi pengajuan "gas".
 
 **Kemajuan (diperbarui 2026-11-20): fondasi RBAC, modul pencatatan,
-dropdown alamat wilayah, peta lokasi sawah (Leaflet + Geoman), dan
-kalender tanam & panen SUDAH jadi dan ter-push. Kalender v1 murni tanggal
-turunan (start_date, estimated_harvest_date, tanggal expense) sesuai
-konfirmasi user 2026-11-20 — tanpa entri manual, tanpa tabel
-planting_cycles/harvest_records (itu digabung ke modul laporan/panen).
-Sisa Fase 2: laporan biaya produksi, surat perjanjian.**
+dropdown alamat wilayah, peta lokasi sawah (Leaflet + Geoman), kalender
+tanam & panen, dan laporan biaya produksi & bagi hasil SUDAH jadi dan
+ter-push. Kalender v1 murni tanggal turunan (start_date,
+estimated_harvest_date, tanggal expense) sesuai konfirmasi user
+2026-11-20 — tanpa entri manual. Laporan sesuai rekomendasi yang
+disetujui user 2026-11-20: sampai bagi hasil, tabel `harvest_records`
+multi-panen, rekap global + per proyek siap cetak, pemilik bisa lihat
+laporannya di webapp (penggarap tidak). Sisa Fase 2: surat perjanjian.**
 
 ## Yang dibangun sekarang — HANYA pencatatan
 
