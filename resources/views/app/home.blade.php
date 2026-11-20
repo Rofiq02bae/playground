@@ -30,11 +30,13 @@
         <a href="{{ route('app.calendar.index') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
             <p class="text-sm font-semibold text-emerald-900">Kalender Tanam &amp; Panen</p>
         </a>
-        @foreach (['Laporan Biaya Produksi', 'Surat Perjanjian'] as $menu)
-            <div class="rounded-2xl border border-stone-200 bg-white p-4">
-                <p class="text-sm font-semibold text-stone-800">{{ $menu }}</p>
-                <p class="mt-1 text-xs text-stone-400">Tahap berikutnya</p>
-            </div>
-        @endforeach
+        <a href="{{ route('app.reports.index') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
+            <p class="text-sm font-semibold text-emerald-900">Laporan Biaya Produksi</p>
+            <p class="mt-1 text-xs text-stone-500">laporan pengeluaran dan pemasukan</p>
+        </a>
+        <a href="{{ route('') }}" class="rounded-2xl border border-emerald-200 bg-white p-4">
+            <p class="text-sm font-semibold text-emerald-900">Surat Perjanjian</p>
+            <p class="mt-1 text-xs text-stone-500">surat perjanjian penggarapan sawah</p>
+        </a>
     </div>
 @endsection
