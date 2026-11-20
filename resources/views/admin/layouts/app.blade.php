@@ -8,7 +8,9 @@
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-800 antialiased">
     @php($pendingNav = \App\Models\ProjectExpense::where('status', 'pending')->count())
-    <header class="border-b border-stone-200 bg-white">
+    {{-- Backdrop gelap tipis di belakang panel menu mobile (klik untuk menutup) --}}
+    <div id="admin-menu-backdrop" class="fixed inset-0 z-30 hidden bg-stone-950/40 lg:hidden"></div>
+    <header class="relative z-40 border-b border-stone-200 bg-white">
         <div class="mx-auto flex max-w-6xl items-center gap-x-6 px-5 py-3">
             <a href="{{ route('admin.articles.index') }}" class="flex items-center gap-2.5">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-700 font-semibold text-white">F</span>
@@ -44,8 +46,8 @@
             </button>
         </div>
 
-        {{-- Panel menu mobile: daftar link vertikal, dibuka dari hamburger --}}
-        <nav id="admin-mobile-menu" class="hidden border-t border-stone-100 lg:hidden">
+        {{-- Panel menu mobile: melayang menumpuk di atas halaman (overlay), dibuka dari hamburger --}}
+        <nav id="admin-mobile-menu" class="absolute inset-x-0 top-full z-40 hidden border-b border-stone-200 bg-white shadow-xl lg:hidden">
             <div class="mx-auto max-w-6xl px-5 py-3 text-sm font-medium">
                 <a href="{{ route('admin.articles.index') }}" class="block rounded-lg px-3 py-2.5 text-emerald-800 hover:bg-stone-50">Artikel</a>
                 <a href="{{ route('admin.projects.index') }}" class="block rounded-lg px-3 py-2.5 text-stone-600 hover:bg-stone-50 hover:text-emerald-800">Proyek Sawah</a>
@@ -78,19 +80,26 @@
     </main>
 
     <script>
-        // Toggle menu hamburger untuk navbar mode mobile/webapp.
+        // Toggle menu hamburger (overlay) untuk navbar mode mobile/webapp.
         (function () {
             var button = document.getElementById('admin-menu-button');
             var menu = document.getElementById('admin-mobile-menu');
+            var backdrop = document.getElementById('admin-menu-backdrop');
             if (!button || !menu) return;
             var iconOpen = document.getElementById('admin-menu-icon-open');
             var iconClose = document.getElementById('admin-menu-icon-close');
+            function setOpen(open) {
+                menu.classList.toggle('hidden', !open);
+                if (backdrop) backdrop.classList.toggle('hidden', !open);
+                button.setAttribute('aria-expanded', String(open));
+                if (iconOpen) iconOpen.classList.toggle('hidden', open);
+                if (iconClose) iconClose.classList.toggle('hidden', !open);
+            }
             button.addEventListener('click', function () {
-                var isHidden = menu.classList.toggle('hidden');
-                button.setAttribute('aria-expanded', String(!isHidden));
-                if (iconOpen) iconOpen.classList.toggle('hidden', !isHidden);
-                if (iconClose) iconClose.classList.toggle('hidden', isHidden);
+                setOpen(menu.classList.contains('hidden'));
             });
+            if (backdrop) backdrop.addEventListener('click', function () { setOpen(false); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
         })();
     </script>
 </body>
