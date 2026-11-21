@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Support\Midtrans;
+use App\Support\Shipping;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -52,6 +53,18 @@ class OrderController extends Controller
         $order = Midtrans::sync($order);
 
         return back()->with('success', 'Status pesanan: '.$order->statusLabel().'.');
+    }
+
+    /** Lacak paket (JSON untuk timeline di halaman detail pesanan). */
+    public function tracking(Request $request, Order $order)
+    {
+        abort_unless($order->user_id === $request->user()->id, 404);
+
+        try {
+            return response()->json(Shipping::tracking($order));
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
     }
 
     /** Pembeli membatalkan pesanannya sendiri selama belum dibayar. */

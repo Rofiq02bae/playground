@@ -176,4 +176,75 @@ class Shipping
             'waybill' => $response->json('courier.waybill_id'),
         ];
     }
+
+    /** Label Bahasa Indonesia untuk status pelacakan Biteship. */
+    public static function trackingStatusLabel(string $status): string
+    {
+        return match ($status) {
+            'confirmed' => 'Pesanan dikonfirmasi kurir',
+            'allocated' => 'Kurir ditugaskan',
+            'picking_up' => 'Kurir menuju titik jemput',
+            'picked' => 'Paket telah dijemput',
+            'dropping_off' => 'Paket dalam perjalanan',
+            'delivered' => 'Paket terkirim',
+            'on_hold' => 'Paket tertahan',
+            'returned' => 'Paket dikembalikan ke pengirim',
+            'return_in_transit' => 'Paket sedang dikembalikan',
+            'cancelled' => 'Pengiriman dibatalkan',
+            'rejected' => 'Paket ditolak',
+            'disposed' => 'Paket dimusnahkan',
+            default => $status === '' ? 'Tidak diketahui' : ucfirst(str_replace('_', ' ', $status)),
+        };
+    }
+
+    /**
+     * Lacak paket dari Biteship berdasarkan nomor resi + kode kurir pesanan.
+     * @return array{status: string, status_label: string, waybill: string, history: array<int, array{note: string, status: string, status_label: string, updated_at: ?string}>}
+     * @throws \RuntimeException bila belum bisa dilacak / Biteship menolak.
+     */
+    public static function tracking(Order $order): array
+    {
+        if (! self::configured()) {
+            throw new \RuntimeException('Layanan pengiriman belum dikonfigurasi (BITESHIP_API_KEY kosong).');
+        }
+
+        if (blank($order->waybill) || blank($order->courier_company)) {
+            throw new \RuntimeException('Pesanan ini belum memiliki nomor resi untuk dilacak.');
+        }
+
+        try {
+            $response = self::http()->get(
+                config('biteship.base_url').'/v1/trackings/'.$order->waybill.'/couriers/'.strtolower((string) $order->courier_company)
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Biteship tracking error: '.$e->getMessage(), ['order' => $order->code]);
+            throw new \RuntimeException('Gagal menghubungi layanan pelacakan. Coba lagi sebentar lagi.');
+        }
+
+        if (! $response->successful()) {
+            Log::warning('Biteship tracking gagal', ['order' => $order->code, 'status' => $response->status(), 'body' => $response->body()]);
+            $reason = self::errorReason($response);
+            throw new \RuntimeException('Pelacakan belum tersedia'.($reason ? ': '.$reason : '.'));
+        }
+
+        $history = collect($response->json('history', []))
+            ->map(fn ($h) => [
+                'note' => (string) ($h['note'] ?? ''),
+                'status' => (string) ($h['status'] ?? ''),
+                'status_label' => self::trackingStatusLabel((string) ($h['status'] ?? '')),
+                'updated_at' => $h['updated_at'] ?? null,
+            ])
+            ->sortByDesc('updated_at')
+            ->values()
+            ->all();
+
+        $status = (string) ($response->json('status') ?? '');
+
+        return [
+            'status' => $status,
+            'status_label' => self::trackingStatusLabel($status),
+            'waybill' => (string) ($response->json('waybill_id') ?? $order->waybill),
+            'history' => $history,
+        ];
+    }
 }

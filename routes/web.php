@@ -59,6 +59,7 @@ Route::prefix('produk')->name('shop.')->group(function (): void {
         Route::get('/pesanan', [ShopOrderController::class, 'index'])->name('orders.index');
         Route::get('/pesanan/{order:code}', [ShopOrderController::class, 'show'])->name('orders.show');
         Route::post('/pesanan/{order:code}/cek-status', [ShopOrderController::class, 'checkStatus'])->name('orders.check');
+        Route::get('/pesanan/{order:code}/lacak', [ShopOrderController::class, 'tracking'])->name('orders.tracking');
         Route::post('/pesanan/{order:code}/batal', [ShopOrderController::class, 'cancel'])->name('orders.cancel');
     });
 
@@ -94,6 +95,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/orders/{order}/kirim-manual', [AdminOrderController::class, 'shipManual'])->name('orders.shipManual');
         Route::post('/orders/{order}/selesai', [AdminOrderController::class, 'complete'])->name('orders.complete');
         Route::post('/orders/{order}/batal', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
+        Route::get('/orders/{order}/lacak', [AdminOrderController::class, 'tracking'])->name('orders.tracking');
         Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
         Route::get('/kalender', [\App\Http\Controllers\Admin\CalendarController::class, 'index'])->name('calendar.index');
         Route::get('/laporan', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');

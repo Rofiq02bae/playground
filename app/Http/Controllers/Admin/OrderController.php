@@ -35,6 +35,16 @@ class OrderController extends Controller
         return view('admin.orders.show', ['order' => $order]);
     }
 
+    /** Lacak paket (JSON untuk timeline di halaman detail pesanan admin). */
+    public function tracking(Order $order)
+    {
+        try {
+            return response()->json(Shipping::tracking($order));
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
     public function process(Order $order)
     {
         abort_unless($order->status === Order::STATUS_DIBAYAR, 422, 'Pesanan belum dibayar.');

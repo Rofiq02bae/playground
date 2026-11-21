@@ -106,6 +106,10 @@
                     </div>
                 @endif
             </section>
+
+            @if ($order->waybill)
+                @include('partials.tracking-box', ['trackingUrl' => route('admin.orders.tracking', $order)])
+            @endif
         </aside>
     </div>
 @endsection

@@ -48,6 +48,10 @@
                     </div>
                 @endif
             </section>
+
+            @if ($order->waybill)
+                @include('partials.tracking-box', ['trackingUrl' => route('shop.orders.tracking', $order->code)])
+            @endif
         </div>
 
         <aside class="lg:col-span-2">

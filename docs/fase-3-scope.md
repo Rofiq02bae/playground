@@ -74,6 +74,16 @@ admin mengelola dari dashboard admin yang sama (menu induk **Marketplace** denga
   Terverifikasi 46/46 cek HTTP memakai stub lokal Midtrans & Biteship (kunci asli user
   belum diberikan — integrasi membaca base URL & kunci dari config/.env).
   SISA PENGINGAT: berat paket masih berat minimum 1000 gram (lihat Keputusan 3.2 poin 1).
+- **Lacak paket (menyusul 3.2, 2026-11-21)** — integrasi Biteship terkonfirmasi jalan
+  end-to-end dengan API key testing asli user (resi terbit, pesanan sampai Selesai) setelah
+  tiga perbaikan: pesan error asli Biteship ditampilkan di halaman admin, payload buat order
+  dibuat FLAT (`courier_company`/`courier_type` + kode kurir dari rates, bukan nama tampilan),
+  dan data pengirim `.env` yang kosong jatuh ke default perusahaan + guard kelengkapan.
+  Fitur lacak: `App\Support\Shipping::tracking()` (GET /v1/trackings/{resi}/couriers/{kode}),
+  endpoint JSON pembeli (`/produk/pesanan/{code}/lacak`, hanya pemilik) & admin
+  (`/admin/orders/{id}/lacak`), timeline di partial `partials/tracking-box` pada halaman
+  detail pesanan keduanya (hanya tampil bila ada resi). Status Biteship diterjemahkan
+  (confirmed/picked/dropping_off/delivered/dll). Terverifikasi 16/16 cek HTTP vs stub.
 
 ## Catatan data
 
