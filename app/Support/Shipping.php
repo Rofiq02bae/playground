@@ -198,36 +198,31 @@ class Shipping
     }
 
     /**
-     * Lacak paket dari Biteship berdasarkan nomor resi + kode kurir pesanan.
-     * @return array{status: string, status_label: string, waybill: string, history: array<int, array{note: string, status: string, status_label: string, updated_at: ?string}>}
-     * @throws \RuntimeException bila belum bisa dilacak / Biteship menolak.
+     * Ambil JSON dari endpoint GET Biteship; RuntimeException berpesan jelas bila gagal.
+     * @throws \RuntimeException
      */
-    public static function tracking(Order $order): array
+    private static function fetchJson(string $path, Order $order): array
     {
-        if (! self::configured()) {
-            throw new \RuntimeException('Layanan pengiriman belum dikonfigurasi (BITESHIP_API_KEY kosong).');
-        }
-
-        if (blank($order->waybill) || blank($order->courier_company)) {
-            throw new \RuntimeException('Pesanan ini belum memiliki nomor resi untuk dilacak.');
-        }
-
         try {
-            $response = self::http()->get(
-                config('biteship.base_url').'/v1/trackings/'.$order->waybill.'/couriers/'.strtolower((string) $order->courier_company)
-            );
+            $response = self::http()->get(config('biteship.base_url').$path);
         } catch (\Throwable $e) {
-            Log::warning('Biteship tracking error: '.$e->getMessage(), ['order' => $order->code]);
+            Log::warning('Biteship GET '.$path.' error: '.$e->getMessage(), ['order' => $order->code]);
             throw new \RuntimeException('Gagal menghubungi layanan pelacakan. Coba lagi sebentar lagi.');
         }
 
         if (! $response->successful()) {
-            Log::warning('Biteship tracking gagal', ['order' => $order->code, 'status' => $response->status(), 'body' => $response->body()]);
+            Log::warning('Biteship GET '.$path.' gagal', ['order' => $order->code, 'status' => $response->status(), 'body' => $response->body()]);
             $reason = self::errorReason($response);
             throw new \RuntimeException('Pelacakan belum tersedia'.($reason ? ': '.$reason : '.'));
         }
 
-        $history = collect($response->json('history', []))
+        return $response->json() ?? [];
+    }
+
+    /** Bentukkan data tracking/order Biteship menjadi struktur timeline yang seragam. */
+    private static function normalizeTracking(array $data, Order $order): array
+    {
+        $history = collect($data['history'] ?? [])
             ->map(fn ($h) => [
                 'note' => (string) ($h['note'] ?? ''),
                 'status' => (string) ($h['status'] ?? ''),
@@ -238,13 +233,84 @@ class Shipping
             ->values()
             ->all();
 
-        $status = (string) ($response->json('status') ?? '');
+        $status = (string) ($data['status'] ?? '');
+
+        // Sumber data tanpa riwayat (mis. objek order): tampilkan status terakhirnya saja.
+        if ($history === [] && $status !== '') {
+            $history = [[
+                'note' => '',
+                'status' => $status,
+                'status_label' => self::trackingStatusLabel($status),
+                'updated_at' => $data['updated_at'] ?? null,
+            ]];
+        }
 
         return [
             'status' => $status,
             'status_label' => self::trackingStatusLabel($status),
-            'waybill' => (string) ($response->json('waybill_id') ?? $order->waybill),
+            'waybill' => (string) ($data['waybill_id'] ?? $data['courier']['waybill_id'] ?? $order->waybill),
             'history' => $history,
         ];
+    }
+
+    /**
+     * Lacak paket pesanan dari Biteship.
+     *
+     * Jalur utama untuk pesanan yang dibuat lewat API: ambil tracking_id dari
+     * objek order (GET /v1/orders/{id}), lalu baca objek tracking resminya
+     * (GET /v1/trackings/{tracking_id}). Endpoint publik berbasis nomor resi
+     * mengandalkan data kurir sungguhan — order mode testing tidak terhubung
+     * ke kurir asli, jadi di sana selalu "Data is not found"; endpoint publik
+     * hanya dipakai untuk resi manual yang memang resi kurir asli.
+     *
+     * @return array{status: string, status_label: string, waybill: string, history: array<int, array{note: string, status: string, status_label: string, updated_at: ?string}>}
+     * @throws \RuntimeException bila belum bisa dilacak / Biteship menolak.
+     */
+    public static function tracking(Order $order): array
+    {
+        if (! self::configured()) {
+            throw new \RuntimeException('Layanan pengiriman belum dikonfigurasi (BITESHIP_API_KEY kosong).');
+        }
+
+        if (blank($order->waybill) && blank($order->biteship_order_id)) {
+            throw new \RuntimeException('Pesanan ini belum memiliki nomor resi untuk dilacak.');
+        }
+
+        $lastError = null;
+
+        if (filled($order->biteship_order_id)) {
+            try {
+                $orderData = self::fetchJson('/v1/orders/'.$order->biteship_order_id, $order);
+                $trackingId = $orderData['courier']['tracking_id'] ?? null;
+
+                if (filled($trackingId)) {
+                    try {
+                        return self::normalizeTracking(self::fetchJson('/v1/trackings/'.$trackingId, $order), $order);
+                    } catch (\RuntimeException $e) {
+                        $lastError = $e;
+                    }
+                }
+
+                // Objek order sendiri membawa status terakhir — cukup untuk timeline.
+                if (filled($orderData['status'] ?? null)) {
+                    return self::normalizeTracking($orderData, $order);
+                }
+            } catch (\RuntimeException $e) {
+                $lastError = $e;
+            }
+        }
+
+        if (filled($order->waybill) && filled($order->courier_company)) {
+            try {
+                return self::normalizeTracking(
+                    self::fetchJson('/v1/trackings/'.$order->waybill.'/couriers/'.strtolower((string) $order->courier_company), $order),
+                    $order
+                );
+            } catch (\RuntimeException $e) {
+                $lastError = $e;
+            }
+        }
+
+        throw $lastError ?? new \RuntimeException('Pelacakan belum tersedia.');
     }
 }

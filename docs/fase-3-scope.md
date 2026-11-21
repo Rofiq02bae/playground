@@ -79,11 +79,18 @@ admin mengelola dari dashboard admin yang sama (menu induk **Marketplace** denga
   tiga perbaikan: pesan error asli Biteship ditampilkan di halaman admin, payload buat order
   dibuat FLAT (`courier_company`/`courier_type` + kode kurir dari rates, bukan nama tampilan),
   dan data pengirim `.env` yang kosong jatuh ke default perusahaan + guard kelengkapan.
-  Fitur lacak: `App\Support\Shipping::tracking()` (GET /v1/trackings/{resi}/couriers/{kode}),
-  endpoint JSON pembeli (`/produk/pesanan/{code}/lacak`, hanya pemilik) & admin
-  (`/admin/orders/{id}/lacak`), timeline di partial `partials/tracking-box` pada halaman
-  detail pesanan keduanya (hanya tampil bila ada resi). Status Biteship diterjemahkan
+  Fitur lacak: `App\Support\Shipping::tracking()`, endpoint JSON pembeli
+  (`/produk/pesanan/{code}/lacak`, hanya pemilik) & admin (`/admin/orders/{id}/lacak`),
+  timeline di partial `partials/tracking-box` pada halaman detail pesanan keduanya
+  (hanya tampil bila ada resi). Status Biteship diterjemahkan
   (confirmed/picked/dropping_off/delivered/dll). Terverifikasi 16/16 cek HTTP vs stub.
+  KOREKSI jalur lacak (2026-11-21, dari tes asli user): endpoint publik berbasis resi
+  (GET /v1/trackings/{resi}/couriers/{kode}) mengandalkan data kurir sungguhan sehingga
+  order mode testing selalu "Data is not found" (order testing tidak terhubung ke kurir
+  asli; statusnya disimulasikan dari dashboard Biteship). Jalur utama kini: ambil
+  tracking_id dari objek order (GET /v1/orders/{id}) lalu GET /v1/trackings/{tracking_id},
+  jatuh ke status/riwayat objek order bila perlu; endpoint publik hanya untuk resi manual.
+  Terverifikasi ulang 12/12 unit + 16/16 HTTP vs stub peniru perilaku mode testing.
 
 ## Catatan data
 
