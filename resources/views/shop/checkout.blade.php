@@ -187,7 +187,7 @@
                     const label = document.createElement('label');
                     label.className = 'flex cursor-pointer items-center gap-3 rounded-xl border border-stone-300 px-3.5 py-3 text-sm transition hover:border-emerald-500';
                     label.innerHTML = '<input type="radio" name="courier_key" value="' + r.key + '" class="accent-emerald-700" ' + (i === 0 ? 'checked' : '') + '>' +
-                        '<span class="flex-1"><span class="font-semibold text-stone-900">' + r.company + '</span> <span class="text-stone-500">' + r.service + '</span>' +
+                        '<span class="flex-1"><span class="font-semibold text-stone-900">' + (r.company_label || r.company) + '</span> <span class="text-stone-500">' + (r.service_label || r.service) + '</span>' +
                         (r.duration ? '<span class="block text-xs text-stone-400">Estimasi: ' + r.duration + '</span>' : '') + '</span>' +
                         '<span class="font-bold text-emerald-800">' + rupiah(r.price) + '</span>';
                     label.querySelector('input').addEventListener('change', function () { setTotal(r.price); });

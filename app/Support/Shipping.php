@@ -86,8 +86,12 @@ class Shipping
 
         return collect($response->json('pricing', []))
             ->map(fn ($p) => [
-                'company' => (string) ($p['courier_name'] ?? $p['company'] ?? ''),
-                'service' => (string) ($p['courier_service_name'] ?? $p['service'] ?? ''),
+                // company/service = KODE resmi (dipakai ulang sebagai courier_company/courier_type
+                // saat buat order — Biteship menolak nama tampilan); *_label khusus untuk ditampilkan.
+                'company' => (string) ($p['courier_code'] ?? $p['company'] ?? ''),
+                'service' => (string) ($p['courier_service_code'] ?? $p['type'] ?? ($p['service'] ?? '')),
+                'company_label' => (string) ($p['courier_name'] ?? $p['courier_code'] ?? $p['company'] ?? ''),
+                'service_label' => (string) ($p['courier_service_name'] ?? $p['courier_service_code'] ?? $p['type'] ?? ($p['service'] ?? '')),
                 'price' => (int) ($p['price'] ?? 0),
                 'duration' => $p['duration'] ?? ($p['shipment_duration_range'] ?? null),
             ])
@@ -124,11 +128,12 @@ class Shipping
             ->all();
 
         try {
+            // Payload Biteship itu FLAT (courier_company/courier_type, shipper_contact_*) —
+            // objek bersarang 'courier'/'shipper' diabaikan server dan memicu error
+            // "missing 'courier_type' field".
             $response = self::http()->post(config('biteship.base_url').'/v1/orders', [
-                'shipper' => [
-                    'name' => $origin['name'],
-                    'phone' => $origin['phone'],
-                ],
+                'shipper_contact_name' => $origin['name'],
+                'shipper_contact_phone' => $origin['phone'],
                 'origin_contact_name' => $origin['name'],
                 'origin_contact_phone' => $origin['phone'],
                 'origin_address' => $origin['address'],
@@ -137,10 +142,8 @@ class Shipping
                 'destination_contact_phone' => $order->recipient_phone,
                 'destination_address' => $order->address_text,
                 'destination_postal_code' => $order->postal_code,
-                'courier' => [
-                    'company' => $order->courier_company,
-                    'type' => $order->courier_service,
-                ],
+                'courier_company' => $order->courier_company,
+                'courier_type' => $order->courier_service,
                 'delivery_type' => 'now',
                 'items' => $items,
             ]);
