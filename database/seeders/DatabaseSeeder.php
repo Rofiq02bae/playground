@@ -72,6 +72,7 @@ class DatabaseSeeder extends Seeder
             RegionSeeder::class,
             ArticleSeeder::class,
             Fase2Seeder::class,
+            MarketplaceSeeder::class,
         ]);
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProjectController as AdminProjectController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\App\HomeController as AppHomeController;
 use App\Http\Controllers\App\SawahController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\Shop\AuthController as ShopAuthController;
+use App\Http\Controllers\Shop\ShopController;
 use Illuminate\Support\Facades\Route;
 
 // Beranda utama sementara diarahkan ke blog (Fase 1).
@@ -22,6 +25,19 @@ Route::prefix('blog')->name('blog.')->group(function (): void {
     Route::get('/search', [BlogController::class, 'search'])->name('search');
     Route::get('/category/{slug}', [BlogController::class, 'category'])->name('category');
     Route::get('/{slug}', [BlogController::class, 'show'])->name('show');
+});
+
+// ---------- Marketplace (Fase 3): aplikasi toko terpisah, publik ----------
+// Eksplor katalog tanpa login; checkout (tahap 3.2) wajib login.
+// Rute auth didaftarkan SEBELUM wildcard {product} agar /produk/masuk tidak tertangkap slug.
+Route::prefix('produk')->name('shop.')->group(function (): void {
+    Route::get('/', [ShopController::class, 'index'])->name('index');
+    Route::get('/masuk', [ShopAuthController::class, 'showLogin'])->name('login');
+    Route::post('/masuk', [ShopAuthController::class, 'login'])->name('login.submit');
+    Route::get('/daftar', [ShopAuthController::class, 'showRegister'])->name('register');
+    Route::post('/daftar', [ShopAuthController::class, 'register'])->name('register.submit');
+    Route::post('/keluar', [ShopAuthController::class, 'logout'])->name('logout')->middleware('auth');
+    Route::get('/{product:slug}', [ShopController::class, 'show'])->name('show');
 });
 
 // ---------- Login (satu pintu untuk admin, pemilik, penggarap) ----------
@@ -40,6 +56,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         // Fase 2 — pencatatan (desktop view perusahaan)
         Route::resource('projects', AdminProjectController::class);
         Route::resource('services', AdminServiceController::class)->except(['show']);
+
+        // Fase 3 — marketplace (dikelola dari dashboard admin yang sama)
+        Route::resource('products', AdminProductController::class)->except(['show']);
         Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
         Route::get('/kalender', [\App\Http\Controllers\Admin\CalendarController::class, 'index'])->name('calendar.index');
         Route::get('/laporan', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
@@ -55,10 +74,11 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     });
 });
 
-// ---------- WebApp pencatatan (Fase 2): semua role yang login ----------
+// ---------- WebApp pencatatan (Fase 2): role pencatatan yang login ----------
 // Pemilik = view only, penggarap = view + add (approval perusahaan),
 // admin (perusahaan) = semua akses termasuk webapp.
-Route::prefix('app')->name('app.')->middleware('auth')->group(function (): void {
+// Pembeli marketplace (Fase 3) TIDAK masuk webapp — areanya adalah toko.
+Route::prefix('app')->name('app.')->middleware(['auth', 'role:admin,pemilik,penggarap'])->group(function (): void {
     Route::get('/', [AppHomeController::class, 'index'])->name('home');
     Route::get('/sawah', [SawahController::class, 'index'])->name('sawah.index');
     Route::get('/sawah/{project}', [SawahController::class, 'show'])->name('sawah.show');

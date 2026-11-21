@@ -15,9 +15,16 @@ class AuthController extends Controller
      */
     private function homeFor($user): string
     {
-        return $user->isAdmin()
-            ? route('admin.articles.index')
-            : route('app.home');
+        if ($user->isAdmin()) {
+            return route('admin.articles.index');
+        }
+
+        // Pembeli marketplace pulang ke toko, bukan webapp pencatatan.
+        if ($user->isPembeli()) {
+            return route('shop.index');
+        }
+
+        return route('app.home');
     }
 
     public function showLogin()

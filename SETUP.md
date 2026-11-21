@@ -319,3 +319,34 @@ npm install
 npm run build
 php artisan migrate
 ```
+
+## Fase 3 — Marketplace 3.1: katalog, menu admin, auth pembeli
+
+Marketplace adalah aplikasi terpisah di area `/produk` (tombol **Produk** di
+navbar blog), dikelola dari dashboard admin yang sama lewat menu induk
+**Marketplace → Produk**. Scope lengkap: `docs/fase-3-scope.md`.
+
+- **Katalog publik** — `/produk` (filter kategori Pertanian/Peternakan +
+  pencarian) dan `/produk/{slug}`. Hanya produk berstatus **aktif** yang
+  tampil; draft/arsip disembunyikan (detail draft = 404).
+- **Produk** — kategori hanya `pertanian`/`peternakan`; tipe `barang`
+  (memakai stok) atau `jasa` (tanpa stok, tanpa ongkir). Foto di-upload ke
+  disk `public` (folder `products/`) — pastikan `php artisan storage:link`
+  sudah pernah dijalankan. Produk hasil panen (tahap 3.3) akan terhubung
+  lewat kolom `harvest_project_id`.
+- **Pembeli** — publik boleh eksplor tanpa login. Registrasi mandiri di
+  `/produk/daftar` membuat user role `pembeli`; login bisa dari
+  `/produk/masuk` atau pintu tunggal `/admin/login` (pembeli diarahkan
+  pulang ke `/produk`). Role pembeli **tidak** bisa masuk webapp pencatatan
+  (`/app` khusus admin/pemilik/penggarap). Keranjang & checkout Midtrans
+  menyusul di tahap 3.2.
+- **Seed** — `MarketplaceSeeder`: Jasa Semprot Drone Rp300.000/ha, Jasa
+  Mesin Tanam Rp400.000/ha (tarif normal Fase 2), Alat Penetas Telur
+  Rp1.500.000/unit stok 5 (harga contoh — ubah lewat menu Produk).
+
+Setelah `git pull` untuk perubahan ini, jalankan:
+
+```bash
+npm run build
+php artisan migrate --seed
+```

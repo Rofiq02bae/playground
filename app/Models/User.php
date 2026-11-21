@@ -24,7 +24,10 @@ class User extends Authenticatable
 
     public const ROLE_PENGGARAP = 'penggarap';
 
-    public const ROLES = [self::ROLE_ADMIN, self::ROLE_PEMILIK, self::ROLE_PENGGARAP];
+    // Fase 3 — pembeli marketplace (daftar mandiri dari halaman toko).
+    public const ROLE_PEMBELI = 'pembeli';
+
+    public const ROLES = [self::ROLE_ADMIN, self::ROLE_PEMILIK, self::ROLE_PENGGARAP, self::ROLE_PEMBELI];
 
     /**
      * Get the attributes that should be cast.
@@ -55,12 +58,18 @@ class User extends Authenticatable
         return $this->role === self::ROLE_PENGGARAP;
     }
 
+    public function isPembeli(): bool
+    {
+        return $this->role === self::ROLE_PEMBELI;
+    }
+
     public function roleLabel(): string
     {
         return match ($this->role) {
             self::ROLE_ADMIN => 'Admin (Perusahaan)',
             self::ROLE_PEMILIK => 'Pemilik Sawah',
             self::ROLE_PENGGARAP => 'Penggarap Sawah',
+            self::ROLE_PEMBELI => 'Pembeli',
             default => ucfirst((string) $this->role),
         };
     }

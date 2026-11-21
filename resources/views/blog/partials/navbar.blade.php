@@ -25,6 +25,7 @@
             <div id="blog-nav-menu" class="blog-nav-menu" data-nav-menu>
                 <a href="{{ url('/') }}" class="blog-nav-link">Beranda</a>
                 <a href="{{ route('blog.index') }}" class="blog-nav-link is-active" aria-current="page">Blog</a>
+                <a href="{{ route('shop.index') }}" class="blog-nav-link">Produk</a>
             </div>
         </div>
     </div>
