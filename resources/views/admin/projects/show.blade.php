@@ -95,13 +95,95 @@
         </div>
     </div>
 
+    {{-- Satu trigger untuk dua form: panel lipat berisi tab Pencatatan & Hasil Panen.
+         Panel terbuka otomatis bila submit salah satu form gagal validasi (tab mengikuti form-nya). --}}
+    @php($activeTab = (old('form_type') === 'panen' || $errors->hasAny(['harvest_date', 'quantity_kg'])) ? 'panen' : 'pencatatan')
+    @php($panelOpen = in_array(old('form_type'), ['pencatatan', 'panen'], true) || $errors->hasAny(['category', 'date', 'name', 'quantity', 'unit_price', 'harvest_date', 'quantity_kg']))
     <div class="mb-6">
-        @include('partials.expense-form', ['action' => route('admin.projects.expenses.store', $project)])
+        <button type="button" id="tambah-data-button" aria-expanded="{{ $panelOpen ? 'true' : 'false' }}" aria-controls="tambah-data-panel" class="flex w-full items-center gap-2.5 rounded-2xl bg-emerald-700 px-5 py-4 text-left font-semibold text-white shadow-sm transition hover:bg-emerald-800 sm:w-auto sm:min-w-72">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+            Tambah Data
+            <span class="ml-auto text-sm font-normal text-emerald-100 sm:ml-6">Pencatatan / Panen</span>
+            <svg id="tambah-data-chevron" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 transition-transform duration-300 {{ $panelOpen ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+        </button>
+
+        <div id="tambah-data-panel" class="{{ $panelOpen ? '' : 'hidden' }} mt-4">
+            <div class="mb-4 flex gap-1 rounded-xl bg-stone-200/70 p-1 sm:max-w-md" role="tablist" aria-label="Jenis data">
+                <button type="button" id="tab-btn-pencatatan" role="tab" class="flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition {{ $activeTab === 'pencatatan' ? 'bg-white text-emerald-900 shadow-sm' : 'text-stone-500 hover:text-stone-800' }}">Pencatatan</button>
+                <button type="button" id="tab-btn-panen" role="tab" class="flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition {{ $activeTab === 'panen' ? 'bg-white text-emerald-900 shadow-sm' : 'text-stone-500 hover:text-stone-800' }}">Hasil Panen</button>
+            </div>
+
+            <div id="tab-pane-pencatatan" class="{{ $activeTab === 'pencatatan' ? '' : 'hidden' }}">
+                @include('partials.expense-form', ['action' => route('admin.projects.expenses.store', $project)])
+            </div>
+
+            <div id="tab-pane-panen" class="{{ $activeTab === 'panen' ? '' : 'hidden' }}">
+                <form method="POST" action="{{ route('admin.projects.harvests.store', $project) }}" class="rounded-2xl border border-stone-200 bg-white p-5">
+                    @csrf
+                    <input type="hidden" name="form_type" value="panen">
+                    <h3 class="font-semibold text-stone-900">Catat Hasil Panen</h3>
+                    <p class="mt-0.5 text-xs text-stone-500">Setiap panen dicatat terpisah (bisa bertahap). Total hasil dipakai di laporan untuk laba bersih &amp; bagi hasil.</p>
+                    <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Tanggal panen</label>
+                            <input type="date" name="harvest_date" value="{{ old('harvest_date') }}" required class="w-full rounded-xl border border-stone-300 px-3.5 py-3 text-base outline-none focus:border-emerald-600">
+                            @error('harvest_date')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Hasil (kg)</label>
+                            <input type="number" name="quantity_kg" value="{{ old('quantity_kg') }}" step="0.01" min="0.01" required placeholder="2500" class="w-full rounded-xl border border-stone-300 px-3.5 py-3 text-base outline-none focus:border-emerald-600">
+                            @error('quantity_kg')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Harga jual / kg (Rp)</label>
+                            <input type="number" name="unit_price" value="{{ old('unit_price') }}" step="1" min="0" required placeholder="6000" class="w-full rounded-xl border border-stone-300 px-3.5 py-3 text-base outline-none focus:border-emerald-600">
+                            @error('unit_price')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Catatan (opsional)</label>
+                            <input type="text" name="notes" value="{{ old('notes') }}" placeholder="cth: gabah kering panen" class="w-full rounded-xl border border-stone-300 px-3.5 py-3 text-base outline-none focus:border-emerald-600">
+                        </div>
+                    </div>
+                    <button type="submit" class="mt-5 w-full rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 sm:w-auto">Simpan Hasil Panen</button>
+                </form>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Panel lipat Tambah Data: trigger membuka/menutup panel, tab berpindah antar form.
+        (function () {
+            var button = document.getElementById('tambah-data-button');
+            var panel = document.getElementById('tambah-data-panel');
+            var chevron = document.getElementById('tambah-data-chevron');
+            if (!button || !panel) return;
+            button.addEventListener('click', function () {
+                var open = panel.classList.toggle('hidden') === false;
+                button.setAttribute('aria-expanded', String(open));
+                if (chevron) chevron.classList.toggle('rotate-180', open);
+            });
+            var tabs = { pencatatan: document.getElementById('tab-btn-pencatatan'), panen: document.getElementById('tab-btn-panen') };
+            var panes = { pencatatan: document.getElementById('tab-pane-pencatatan'), panen: document.getElementById('tab-pane-panen') };
+            function activate(name) {
+                Object.keys(tabs).forEach(function (key) {
+                    var active = key === name;
+                    if (panes[key]) panes[key].classList.toggle('hidden', !active);
+                    if (tabs[key]) {
+                        tabs[key].classList.toggle('bg-white', active);
+                        tabs[key].classList.toggle('text-emerald-900', active);
+                        tabs[key].classList.toggle('shadow-sm', active);
+                        tabs[key].classList.toggle('text-stone-500', !active);
+                    }
+                });
+            }
+            if (tabs.pencatatan) tabs.pencatatan.addEventListener('click', function () { activate('pencatatan'); });
+            if (tabs.panen) tabs.panen.addEventListener('click', function () { activate('panen'); });
+        })();
+    </script>
 
     <div class="mb-6 rounded-2xl border border-stone-200 bg-white p-5">
         <h2 class="font-semibold text-stone-900">Hasil Panen</h2>
-        <p class="mb-4 text-sm text-stone-500">Catat setiap panen (bisa bertahap). Total hasil dipakai di laporan untuk laba bersih &amp; bagi hasil.</p>
+        <p class="mb-4 text-sm text-stone-500">Setiap panen dicatat terpisah (bisa bertahap) lewat tombol <strong class="text-stone-700">Tambah Data</strong> di atas. Total hasil dipakai di laporan untuk laba bersih &amp; bagi hasil.</p>
 
         @if ($harvests->isNotEmpty())
             <div class="mb-4 overflow-x-auto">
@@ -140,27 +222,9 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.projects.harvests.store', $project) }}" class="grid gap-3 sm:grid-cols-4">
-            @csrf
-            <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Tanggal panen</label>
-                <input type="date" name="harvest_date" required class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
-            </div>
-            <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Hasil (kg)</label>
-                <input type="number" name="quantity_kg" step="0.01" min="0.01" required placeholder="2500" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
-            </div>
-            <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Harga jual / kg (Rp)</label>
-                <input type="number" name="unit_price" step="1" min="0" required placeholder="6000" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
-            </div>
-            <div class="flex items-end">
-                <button type="submit" class="w-full rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800">Catat Panen</button>
-            </div>
-            <div class="sm:col-span-4">
-                <input type="text" name="notes" placeholder="Catatan (opsional), cth: gabah kering panen" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600">
-            </div>
-        </form>
+        @if ($harvests->isEmpty())
+            <p class="text-sm text-stone-500">Belum ada catatan panen untuk proyek ini.</p>
+        @endif
     </div>
 
     <h2 class="mb-3 font-semibold text-stone-900">Riwayat Pencatatan</h2>

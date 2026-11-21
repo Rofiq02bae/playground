@@ -1,6 +1,7 @@
 {{-- Form tambah pencatatan proyek. Variabel: $project, $categories, $services, $action --}}
 <form method="POST" action="{{ $action }}" class="rounded-2xl border border-stone-200 bg-white p-5">
     @csrf
+    <input type="hidden" name="form_type" value="pencatatan">
     <h3 class="font-semibold text-stone-900">Tambah Pencatatan</h3>
     <p class="mt-0.5 text-xs text-stone-500">Untuk sewa drone / mesin tanam, harga satuan otomatis mengikuti tarif resmi &amp; status membership pemilik ({{ $project->owner->name }}: {{ $project->owner->membershipLabel() }}).</p>
 

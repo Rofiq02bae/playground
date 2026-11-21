@@ -33,9 +33,31 @@
     </div>
 
     @if ($canAdd)
+        {{-- Form pencatatan di balik satu trigger: panel lipat, terbuka otomatis bila submit gagal validasi --}}
+        @php($panelOpen = old('form_type') === 'pencatatan' || $errors->hasAny(['category', 'date', 'name', 'quantity', 'unit_price']))
         <div class="mt-4">
-            @include('partials.expense-form', ['action' => route('app.sawah.expenses.store', $project)])
+            <button type="button" id="tambah-catatan-button" aria-expanded="{{ $panelOpen ? 'true' : 'false' }}" aria-controls="tambah-catatan-panel" class="flex w-full items-center gap-2.5 rounded-2xl bg-emerald-700 px-5 py-4 text-left font-semibold text-white shadow-sm transition hover:bg-emerald-800 active:bg-emerald-900">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                Tambah Pencatatan
+                <svg id="tambah-catatan-chevron" xmlns="http://www.w3.org/2000/svg" class="ml-auto h-5 w-5 shrink-0 transition-transform duration-300 {{ $panelOpen ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+            </button>
+            <div id="tambah-catatan-panel" class="{{ $panelOpen ? '' : 'hidden' }} mt-3">
+                @include('partials.expense-form', ['action' => route('app.sawah.expenses.store', $project)])
+            </div>
         </div>
+        <script>
+            (function () {
+                var button = document.getElementById('tambah-catatan-button');
+                var panel = document.getElementById('tambah-catatan-panel');
+                var chevron = document.getElementById('tambah-catatan-chevron');
+                if (!button || !panel) return;
+                button.addEventListener('click', function () {
+                    var open = panel.classList.toggle('hidden') === false;
+                    button.setAttribute('aria-expanded', String(open));
+                    if (chevron) chevron.classList.toggle('rotate-180', open);
+                });
+            })();
+        </script>
     @elseif (auth()->user()->isPemilik())
         <p class="mt-4 flex items-start gap-2.5 rounded-2xl border border-stone-200 bg-white px-4 py-3.5 text-sm leading-relaxed text-stone-500 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 h-5 w-5 shrink-0 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 11v5" /><path d="M12 8h.01" /></svg>
