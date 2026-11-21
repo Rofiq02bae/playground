@@ -113,6 +113,19 @@ class Shipping
         }
 
         $origin = config('biteship.origin');
+
+        // Cek kelengkapan data pengirim di awal — lebih baik pesan jelas di sini
+        // daripada ditolak Biteship satu field demi satu field.
+        $missing = [];
+        foreach (['name' => 'BITESHIP_ORIGIN_NAME', 'phone' => 'BITESHIP_ORIGIN_PHONE', 'address' => 'BITESHIP_ORIGIN_ADDRESS', 'postal_code' => 'BITESHIP_ORIGIN_POSTAL_CODE'] as $key => $envKey) {
+            if (blank($origin[$key] ?? null)) {
+                $missing[] = $envKey;
+            }
+        }
+        if ($missing) {
+            throw new \RuntimeException('Data pengirim (gudang) belum lengkap — isi di .env: '.implode(', ', $missing).'.');
+        }
+
         $weight = (int) config('biteship.default_weight_gram', 1000);
 
         $items = $order->items

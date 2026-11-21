@@ -24,12 +24,14 @@ return [
      */
     'default_weight_gram' => (int) env('BITESHIP_DEFAULT_WEIGHT_GRAM', 1000),
 
-    // Alamat asal pengiriman (gudang perusahaan). Default mengikuti alamat
-    // perusahaan di config/perjanjian.php; override lewat .env bila beda.
+    // Alamat asal pengiriman (gudang perusahaan). Baris .env yang KOSONG
+    // (mis. hasil salin .env.example) dianggap belum diisi dan jatuh ke
+    // default di bawah — env('KEY', 'default') saja tidak cukup, karena
+    // variabel yang terdaftar tapi kosong tetap terbaca sebagai ''.
     'origin' => [
-        'name' => env('BITESHIP_ORIGIN_NAME', 'PT Sarana Akses Adikarya'),
-        'phone' => env('BITESHIP_ORIGIN_PHONE', ''),
-        'address' => env('BITESHIP_ORIGIN_ADDRESS', 'Jalan Pandansimo, Bakungan, Klurahan, Trimurti, Kec. Srandakan, Kabupaten Bantul, Daerah Istimewa Yogyakarta'),
-        'postal_code' => env('BITESHIP_ORIGIN_POSTAL_CODE', '55762'),
+        'name' => env('BITESHIP_ORIGIN_NAME') ?: 'PT Sarana Akses Adikarya',
+        'phone' => env('BITESHIP_ORIGIN_PHONE') ?: '',
+        'address' => env('BITESHIP_ORIGIN_ADDRESS') ?: 'Jalan Pandansimo, Bakungan, Klurahan, Trimurti, Kec. Srandakan, Kabupaten Bantul, Daerah Istimewa Yogyakarta',
+        'postal_code' => env('BITESHIP_ORIGIN_POSTAL_CODE') ?: '55762',
     ],
 ];
