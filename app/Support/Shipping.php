@@ -25,6 +25,18 @@ class Shipping
             ->timeout(25);
     }
 
+    /** Pesan error asli dari respons Biteship, agar alasan penolakan tampil di halaman (bukan cuma di log). */
+    private static function errorReason($response): ?string
+    {
+        $error = $response->json('error') ?? $response->json('message');
+        if (is_array($error)) {
+            $error = collect($error)->flatten()->filter()->implode(' ');
+        }
+        $error = is_string($error) ? trim($error) : null;
+
+        return $error !== null && $error !== '' ? $error : null;
+    }
+
     /** Kunci pilihan kurir yang dipilih pembeli: "company|service". */
     public static function rateKey(array $rate): string
     {
@@ -67,8 +79,9 @@ class Shipping
         }
 
         if (! $response->successful()) {
-            Log::warning('Biteship rates gagal', ['body' => $response->body()]);
-            throw new \RuntimeException('Ongkir ke alamat ini belum bisa dihitung. Periksa kode pos tujuan.');
+            Log::warning('Biteship rates gagal', ['status' => $response->status(), 'body' => $response->body()]);
+            $reason = self::errorReason($response);
+            throw new \RuntimeException('Ongkir ke alamat ini belum bisa dihitung'.($reason ? ' ('.$reason.')' : '').'. Periksa kode pos tujuan.');
         }
 
         return collect($response->json('pricing', []))
@@ -137,8 +150,9 @@ class Shipping
         }
 
         if (! $response->successful() || blank($response->json('id'))) {
-            Log::warning('Biteship createOrder gagal', ['order' => $order->code, 'body' => $response->body()]);
-            throw new \RuntimeException('Biteship menolak pembuatan order. Gunakan input resi manual.');
+            Log::warning('Biteship createOrder gagal', ['order' => $order->code, 'status' => $response->status(), 'body' => $response->body()]);
+            $reason = self::errorReason($response);
+            throw new \RuntimeException('Biteship menolak pembuatan order'.($reason ? ': '.$reason : '').' Gunakan input resi manual.');
         }
 
         return [
