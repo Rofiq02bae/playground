@@ -350,3 +350,38 @@ Setelah `git pull` untuk perubahan ini, jalankan:
 npm run build
 php artisan migrate --seed
 ```
+
+## Fase 3 — Marketplace 3.2: keranjang, checkout, Midtrans, Biteship
+
+- **Keranjang** — publik tanpa login (session, bertahan setelah login).
+  Checkout **wajib login**; **admin dikecualikan** dari membeli (403).
+- **Checkout** — alamat memakai dropdown wilayah + kode pos (tersimpan ke
+  profil). Ongkir dari **Biteship** dihitung ulang di server (tidak percaya
+  angka browser). Jasa tidak dihitung ongkir & tidak dikirim; keranjang
+  campuran boleh. Satuan jasa = **m²** (seed drone Rp30/m², mesin tanam
+  Rp40/m²).
+- **Stok** dipotong saat pesanan dibuat; kembali otomatis bila pesanan
+  dibatalkan pembeli/admin atau pembayaran kedaluwarsa. Batas bayar 24 jam.
+- **Pembayaran Midtrans Snap** — status resmi disinkronkan lewat tombol
+  "Cek Status" di halaman pesanan; webhook `POST /midtrans/notification`
+  (verifikasi signature) aktif begitu ada URL publik dan didaftarkan di
+  dashboard Midtrans.
+- **Admin** — menu Marketplace → **Pesanan** (badge = jumlah status
+  "dibayar"): proses → kirim (resi otomatis dari order Biteship, fallback
+  resi manual) → selesai; pesanan jasa langsung diproses → selesai.
+- **Kunci API** — isi di `.env` (lihat `.env.example`): `MIDTRANS_SERVER_KEY`,
+  `MIDTRANS_CLIENT_KEY`, `BITESHIP_API_KEY`, dan `BITESHIP_ORIGIN_PHONE`
+  (no. HP gudang untuk pickup kurir). Tanpa kunci Midtrans, pesanan tetap
+  bisa dibuat tetapi tombol Bayar tidak muncul; tanpa kunci Biteship,
+  checkout yang berisi barang tidak bisa menghitung ongkir.
+- **BERAT PAKET (sementara)** — ongkir memakai berat minimum Biteship
+  1000 gram untuk semua paket (`BITESHIP_DEFAULT_WEIGHT_GRAM`).
+  **Perlu diubah ke berat asli per produk** setelah perusahaan menimbang
+  produknya — pengingat tercatat untuk user.
+
+Setelah `git pull` untuk perubahan ini, jalankan:
+
+```bash
+npm run build
+php artisan migrate
+```

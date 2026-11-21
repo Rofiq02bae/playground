@@ -12,7 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->redirectGuestsTo('/admin/login');
+        // Tamu dari area toko diarahkan ke pintu masuk toko, sisanya ke pintu tunggal.
+        $middleware->redirectGuestsTo(fn (Request $request) => ($request->is('produk') || $request->is('produk/*')) ? '/produk/masuk' : '/admin/login');
+        // Webhook Midtrans tidak membawa token CSRF (keasliannya dari verifikasi signature).
+        $middleware->validateCsrfTokens(except: ['midtrans/notification']);
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);

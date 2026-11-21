@@ -31,6 +31,22 @@ admin mengelola dari dashboard admin yang sama (menu induk **Marketplace** denga
    Alamat checkout memakai ulang data wilayah Fase 2 (dropdown provinsi → desa).
    Arsitektur: logika pengiriman dibungkus satu class `App\Support\Shipping` agar penyedia bisa diganti.
 
+## Keputusan Tahap 3.2 (user, 2026-11-21)
+
+1. **Berat paket: sementara pakai berat minimum Biteship** (config `biteship.default_weight_gram`
+   = 1000) untuk semua hitungan ongkir — BELUM ada field berat per produk.
+   **PENGINGAT untuk user: ubah ke berat asli per produk setelah 3.2 jadi.**
+2. **Satuan jasa = meter persegi (m²)**, bukan hektar desimal. Harga seed jasa dikonversi:
+   drone Rp30/m² (= Rp300.000/ha), mesin tanam Rp40/m² (= Rp400.000/ha). Jumlah barang & jasa
+   sama-sama bilangan bulat.
+3. **Stok dipotong saat pesanan dibuat**, kembali otomatis bila batal/kedaluwarsa; batas bayar 24 jam.
+4. **Jasa tidak dihitung ongkir dan tidak ada pengiriman** — pengiriman hanya untuk barang.
+   Keranjang campuran boleh; ongkir hanya dari barang.
+5. **Resi otomatis dari Biteship** saat admin mengirim; fallback input resi manual.
+6. **Admin DIKECUALIKAN dari membeli** — checkout hanya untuk pembeli, pemilik, penggarap.
+7. Alamat asal pengiriman default: alamat perusahaan (config/perjanjian.php) kode pos 55762,
+   dapat dioverride lewat .env BITESHIP_ORIGIN_*.
+
 ## Tahapan bangun
 
 - **3.1 Fondasi katalog** — migrasi `products` (+ foto upload), CRUD admin di bawah menu
@@ -51,6 +67,13 @@ admin mengelola dari dashboard admin yang sama (menu induk **Marketplace** denga
   (child Produk; child Pesanan menyusul di 3.2), seed 3 produk awal, area publik `/produk`
   + detail, tombol Produk di navbar blog, registrasi/login pembeli (role `pembeli`,
   webapp pencatatan kini menolak role pembeli). Terverifikasi 43/43 cek HTTP.
+- **3.2 SELESAI 2026-11-21** — keranjang session, checkout wajib login (admin dikecualikan),
+  ongkir Biteship diverifikasi ulang di server, Midtrans Snap + tombol Cek Status + webhook
+  ber-signature, stok terpotong saat pesanan dibuat & kembali saat batal/kedaluwarsa,
+  admin child Pesanan penuh (proses/kirim resi otomatis/manual/selesai/batal + badge).
+  Terverifikasi 46/46 cek HTTP memakai stub lokal Midtrans & Biteship (kunci asli user
+  belum diberikan — integrasi membaca base URL & kunci dari config/.env).
+  SISA PENGINGAT: berat paket masih berat minimum 1000 gram (lihat Keputusan 3.2 poin 1).
 
 ## Catatan data
 

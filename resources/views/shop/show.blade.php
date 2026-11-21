@@ -50,9 +50,21 @@
                 </div>
             @endif
 
-            <div class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-900">
-                Keranjang &amp; pembayaran online (Midtrans) dibuka pada tahap berikutnya. Untuk sekarang katalog ini bisa dieksplorasi publik — checkout akan meminta login agar data pengirimanmu lengkap.
-            </div>
+            @if ($product->isOutOfStock())
+                <div class="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm font-medium text-red-800">
+                    Stok produk ini sedang habis. Silakan cek produk lain di katalog.
+                </div>
+            @else
+                <form method="POST" action="{{ route('shop.cart.add', $product) }}" class="mt-6">
+                    @csrf
+                    <label for="quantity" class="mb-1.5 block text-sm font-medium text-stone-700">Jumlah ({{ $product->unit }})</label>
+                    <div class="flex gap-2">
+                        <input id="quantity" type="number" name="quantity" value="1" min="1" @if ($product->isBarang() && $product->stock) max="{{ $product->stock }}" @endif class="w-28 rounded-xl border border-stone-300 px-3.5 py-3 text-base outline-none focus:border-emerald-600">
+                        <button type="submit" class="flex-1 rounded-xl bg-emerald-700 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800">+ Tambah ke Keranjang</button>
+                    </div>
+                    <p class="mt-2 text-xs text-stone-400">Checkout memerlukan login agar data identitas &amp; alamat pengiriman lengkap. Pembayaran aman via Midtrans.</p>
+                </form>
+            @endif
         </div>
     </div>
 

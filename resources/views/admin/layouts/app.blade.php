@@ -8,6 +8,7 @@
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-800 antialiased">
     @php($pendingNav = \App\Models\ProjectExpense::where('status', 'pending')->count())
+    @php($orderNav = \App\Models\Order::where('status', 'dibayar')->count())
     {{-- Backdrop gelap tipis di belakang drawer menu mobile (klik untuk menutup) --}}
     <div id="admin-menu-backdrop" class="invisible pointer-events-none fixed inset-0 z-30 bg-stone-950/40 opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
@@ -50,14 +51,16 @@
             </a>
             {{-- Marketplace (Fase 3): menu induk dengan daftar child --}}
             <div>
-                <button type="button" data-submenu-toggle aria-expanded="{{ request()->routeIs('admin.products.*') ? 'true' : 'false' }}" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 {{ request()->routeIs('admin.products.*') ? 'bg-emerald-50 font-semibold text-emerald-900' : 'text-stone-600 hover:bg-stone-100 hover:text-emerald-800' }}">
+                <button type="button" data-submenu-toggle aria-expanded="{{ request()->routeIs('admin.products.*') || request()->routeIs('admin.orders.*') ? 'true' : 'false' }}" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.orders.*') ? 'bg-emerald-50 font-semibold text-emerald-900' : 'text-stone-600 hover:bg-stone-100 hover:text-emerald-800' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 8z" /><path d="M8.5 10V6.5a3.5 3.5 0 0 1 7 0V10" /></svg>
                     Marketplace
-                    <svg data-submenu-chevron xmlns="http://www.w3.org/2000/svg" class="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 {{ request()->routeIs('admin.products.*') ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                    <svg data-submenu-chevron xmlns="http://www.w3.org/2000/svg" class="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.orders.*') ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
                 </button>
-                <div data-submenu-panel class="{{ request()->routeIs('admin.products.*') ? '' : 'hidden' }} mt-1 space-y-0.5 pl-8">
+                <div data-submenu-panel class="{{ request()->routeIs('admin.products.*') || request()->routeIs('admin.orders.*') ? '' : 'hidden' }} mt-1 space-y-0.5 pl-8">
                     <a href="{{ route('admin.products.index') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('admin.products.*') ? 'bg-emerald-50 font-semibold text-emerald-900' : 'text-stone-600 hover:bg-stone-100 hover:text-emerald-800' }}">Produk</a>
-                    <span class="block px-3 py-2 text-stone-400">Pesanan <span class="text-xs">(tahap 3.2)</span></span>
+                    <a href="{{ route('admin.orders.index') }}" class="flex items-center rounded-lg px-3 py-2 {{ request()->routeIs('admin.orders.*') ? 'bg-emerald-50 font-semibold text-emerald-900' : 'text-stone-600 hover:bg-stone-100 hover:text-emerald-800' }}">Pesanan
+                        @if ($orderNav > 0)<span class="ml-auto rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">{{ $orderNav }}</span>@endif
+                    </a>
                 </div>
             </div>
             <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 {{ request()->routeIs('admin.users.*') ? 'bg-emerald-50 font-semibold text-emerald-900' : 'text-stone-600 hover:bg-stone-100 hover:text-emerald-800' }}">
@@ -123,6 +126,9 @@
                 <a href="{{ route('admin.services.index') }}" class="block rounded-lg px-3 py-2.5 text-stone-600 hover:bg-stone-50 hover:text-emerald-800">Layanan &amp; Harga</a>
                 <p class="px-3 pb-0.5 pt-3 text-xs font-semibold uppercase tracking-wide text-stone-400">Marketplace</p>
                 <a href="{{ route('admin.products.index') }}" class="block rounded-lg px-3 py-2.5 text-stone-600 hover:bg-stone-50 hover:text-emerald-800">Produk</a>
+                <a href="{{ route('admin.orders.index') }}" class="block rounded-lg px-3 py-2.5 text-stone-600 hover:bg-stone-50 hover:text-emerald-800">Pesanan
+                    @if ($orderNav > 0)<span class="ml-1 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">{{ $orderNav }}</span>@endif
+                </a>
                 <a href="{{ route('admin.users.index') }}" class="block rounded-lg px-3 py-2.5 text-stone-600 hover:bg-stone-50 hover:text-emerald-800">Pengguna</a>
                 <a href="{{ route('app.home') }}" class="block rounded-lg px-3 py-2.5 text-stone-600 hover:bg-stone-50 hover:text-emerald-800">WebApp</a>
                 <a href="{{ route('blog.index') }}" class="block rounded-lg px-3 py-2.5 text-stone-600 hover:bg-stone-50 hover:text-emerald-800" target="_blank" rel="noopener">Lihat Blog</a>
@@ -140,6 +146,9 @@
     <main id="admin-main" class="mx-auto max-w-6xl px-5 pb-8 pt-24 transition-all duration-300 lg:pl-64">
         @if (session('success'))
             <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">{{ session('error') }}</div>
         @endif
 
         @yield('content')

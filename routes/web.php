@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProjectController as AdminProjectController;
 use App\Http\Controllers\Admin\RegionController;
@@ -13,6 +14,11 @@ use App\Http\Controllers\App\HomeController as AppHomeController;
 use App\Http\Controllers\App\SawahController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Shop\AuthController as ShopAuthController;
+use App\Http\Controllers\Shop\CartController;
+use App\Http\Controllers\Shop\CheckoutController;
+use App\Http\Controllers\Shop\MidtransWebhookController;
+use App\Http\Controllers\Shop\OrderController as ShopOrderController;
+use App\Http\Controllers\Shop\RegionController as ShopRegionController;
 use App\Http\Controllers\Shop\ShopController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,8 +43,30 @@ Route::prefix('produk')->name('shop.')->group(function (): void {
     Route::get('/daftar', [ShopAuthController::class, 'showRegister'])->name('register');
     Route::post('/daftar', [ShopAuthController::class, 'register'])->name('register.submit');
     Route::post('/keluar', [ShopAuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+    // Keranjang belanja (publik, berbasis session)
+    Route::get('/keranjang', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/keranjang/tambah/{product}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/keranjang/ubah', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/keranjang/hapus/{product}', [CartController::class, 'remove'])->name('cart.remove');
+
+    // Checkout & pesanan (wajib login; admin dikecualikan dari membeli)
+    Route::middleware('auth')->group(function (): void {
+        Route::get('/daerah', [ShopRegionController::class, 'children'])->name('regions.children');
+        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+        Route::post('/checkout/ongkir', [CheckoutController::class, 'rates'])->name('checkout.rates');
+        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+        Route::get('/pesanan', [ShopOrderController::class, 'index'])->name('orders.index');
+        Route::get('/pesanan/{order:code}', [ShopOrderController::class, 'show'])->name('orders.show');
+        Route::post('/pesanan/{order:code}/cek-status', [ShopOrderController::class, 'checkStatus'])->name('orders.check');
+        Route::post('/pesanan/{order:code}/batal', [ShopOrderController::class, 'cancel'])->name('orders.cancel');
+    });
+
     Route::get('/{product:slug}', [ShopController::class, 'show'])->name('show');
 });
+
+// Webhook notifikasi Midtrans (tanpa login; keaslian dari verifikasi signature).
+Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle'])->name('midtrans.notification');
 
 // ---------- Login (satu pintu untuk admin, pemilik, penggarap) ----------
 Route::prefix('admin')->name('admin.')->group(function (): void {
@@ -59,6 +87,13 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
 
         // Fase 3 — marketplace (dikelola dari dashboard admin yang sama)
         Route::resource('products', AdminProductController::class)->except(['show']);
+        Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/proses', [AdminOrderController::class, 'process'])->name('orders.process');
+        Route::post('/orders/{order}/kirim', [AdminOrderController::class, 'ship'])->name('orders.ship');
+        Route::post('/orders/{order}/kirim-manual', [AdminOrderController::class, 'shipManual'])->name('orders.shipManual');
+        Route::post('/orders/{order}/selesai', [AdminOrderController::class, 'complete'])->name('orders.complete');
+        Route::post('/orders/{order}/batal', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
         Route::get('/kalender', [\App\Http\Controllers\Admin\CalendarController::class, 'index'])->name('calendar.index');
         Route::get('/laporan', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
